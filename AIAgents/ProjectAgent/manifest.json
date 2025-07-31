@@ -1,11 +1,11 @@
 {
-    "version": "1.0.4",
+    "version": "1.0.5",
     "id": "0afe0b09-4a68-42bc-8f49-cce54568f686",
     "developer": {
-        "name": "Markus Wagner",
-        "websiteUrl": "https://go.microsoft.com/fwlink/?linkid=2138949",
-        "privacyUrl": "https://go.microsoft.com/fwlink/?linkid=2138865",
-        "termsOfUseUrl": "https://go.microsoft.com/fwlink/?linkid=2138950"
+        "name": "NewVision WAM 1.0.5",
+        "websiteUrl": "https://delightful-mushroom-05e70a703.1.azurestaticapps.net/",
+        "privacyUrl": "https://www.newvision.eu/impressum",
+        "termsOfUseUrl": "https://www.newvision.eu/datenschutz"
     },
     "name": {
         "short": "Project Manager",
