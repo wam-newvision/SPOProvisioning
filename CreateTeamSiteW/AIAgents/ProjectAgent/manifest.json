@@ -1,11 +1,11 @@
 {
-    "version": "1.0.5",
+    "version": "1.0.6",
     "id": "0afe0b09-4a68-42bc-8f49-cce54568f686",
     "developer": {
-        "name": "NewVision WAM 1.0.5",
-        "websiteUrl": "https://delightful-mushroom-05e70a703.1.azurestaticapps.net/",
-        "privacyUrl": "https://www.newvision.eu/impressum",
-        "termsOfUseUrl": "https://www.newvision.eu/datenschutz"
+        "name": "NewVision WAM 1.0.6",
+        "websiteUrl": "https://delightful-mushroom-05e70a703.1.azurestaticapps.net/index.html",
+        "privacyUrl": "https://www.newvision.eu/datenschutz",
+        "termsOfUseUrl": "https://www.newvision.eu/impressum"
     },
     "name": {
         "short": "Project Manager",
@@ -22,7 +22,7 @@
     "accentColor": "#07687d",
     "configurableTabs": [
         {
-        "configurationUrl": "https://delightful-mushroom-05e70a703.1.azurestaticapps.net/",
+        "configurationUrl": "https://delightful-mushroom-05e70a703.1.azurestaticapps.net/index.html",
         "scopes": ["team"]
         }
     ],

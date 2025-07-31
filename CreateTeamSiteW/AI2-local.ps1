@@ -140,40 +140,49 @@ do {
     }
 } while ($uri)
 
-if (-not $matchingApps) { throw "Keine Apps mit Namen '$appName' gefunden!" }
-
-# 5. Nur diese im Detail prüfen (auf ManifestId)
-$teamsAppId = $null
-log $appManifestId
-foreach ($app in $matchingApps) {
-    $details = Invoke-MgGraphRequest -Method GET -Uri "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/$($app.id)"
-    #Log "DETAILS: " ($details | ConvertTo-Json -Depth 10)
-    log $app.displayName "Details AppId: $($details.externalId)"
-    if ($details.externalId -eq $appManifestId) {
-        $teamsAppId = $app.id
-        Log "Gefunden: TeamsAppId = $teamsAppId für Manifest AppId $appManifestId"
-        break
+if ($matchingApps) {
+     Log "Apps mit Namen '$appName' gefunden, prüfe auf ManifestId '$appManifestId' ..."
+    # 5. Nur diese im Detail prüfen (auf ManifestId)
+    $teamsAppId = $null
+    foreach ($app in $matchingApps) {
+        $details = Invoke-MgGraphRequest -Method GET -Uri "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/$($app.id)"
+        #Log "DETAILS: " ($details | ConvertTo-Json -Depth 10)
+        log $app.displayName "Details AppId: $($details.externalId)"
+        if ($details.externalId -eq $appManifestId) {
+            $teamsAppId = $app.id
+            Log "Gefunden: TeamsAppId = $teamsAppId für Manifest AppId $appManifestId"
+            break
+        }
     }
 }
 
+$noAPP = $false
 if ($teamsAppId) {
     Log "Teams-App bereits im Katalog: $teamsAppId"
-    Log "❌ Lösche Teams-App aus dem App-Katalog: $teamsAppId"
-    Invoke-MgGraphRequest -Method DELETE `
-        -Uri "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/$teamsAppId"
-    Log "App wurde entfernt."
+    $deleteAPP = $false
+    if ($deleteAPP) {
+        Log "❌ Lösche Teams-App aus dem App-Katalog: $teamsAppId"
+        Invoke-MgGraphRequest -Method DELETE `
+            -Uri "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/$teamsAppId"
+        Log "App wurde entfernt."
+        $noAPP = $true
+    }
 } else {
-    Log "⚠️  Keine App-ID gefunden – nichts zu löschen."
+    Log "⚠️  Keine App-ID in Teams APPs gefunden"
+    $noAPP = $true
 }
 
-Log "⬆️  Lade neue Teams-App hoch..."
-$zipBytes = [System.IO.File]::ReadAllBytes($zipPath)
-$response = Invoke-MgGraphRequest -Method POST `
-    -Uri "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps" `
-    -Body $zipBytes `
-    -ContentType "application/zip"
-$teamsAppId = $response.id
-Log "Neue App bereitgestellt: $teamsAppId"
+if ($noAPP) {
+    Log "⬆️  Lade neue Teams-App hoch..."
+    $zipBytes = [System.IO.File]::ReadAllBytes($zipPath)
+    $response = Invoke-MgGraphRequest -Method POST `
+        -Uri "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps" `
+        -Body $zipBytes `
+        -ContentType "application/zip"
+    $teamsAppId = $response.id
+    Log "Neue App bereitgestellt: $teamsAppId"
+    throw "!!! CAUTION !!! You have to enable/unblock this APP manually in Teams Admin Center !!!"
+}
 
 # 6. Team und Kanal suchen
 Log "🔍 Suche Team '$Site'..."
