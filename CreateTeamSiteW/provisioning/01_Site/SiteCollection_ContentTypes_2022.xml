@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pnp:Provisioning xmlns:pnp="http://schemas.dev.office.com/PnP/2022/09/ProvisioningSchema">
+  <pnp:Preferences Generator="OfficeDevPnP.Core, Version=2.28.1807.0, Culture=neutral, PublicKeyToken=5e633289e95c321a" />
+  <pnp:Templates ID="CONTAINER-TEMPLATE-00130E33A7B24A12A4C21F20ADA2D6F8">
+    <pnp:ProvisioningTemplate ID="TEMPLATE-00130E33A7B24A12A4C21F20ADA2D6F8" Version="1" BaseSiteTemplate="GROUP#0" Scope="RootSite">
+      <pnp:ContentTypes>
+        <pnp:ContentType 
+          ID="0x010100776D10CC9E0943CEA6FE18350BDDD96C" 
+          Name="Email" 
+          Description="Create a new document." 
+          Group="MacroView DMF Content Types" 
+          NewFormUrl="" EditFormUrl="" DisplayFormUrl="">
+          <pnp:FieldRefs>
+            <pnp:FieldRef ID="c042a256-787d-4a6f-8a8a-cf6ab767f12d" Name="ContentType" />
+            <pnp:FieldRef ID="5f47e085-2150-41dc-b661-442f3027f552" Name="SelectFilename" />
+            <pnp:FieldRef ID="8553196d-ec8d-4564-9861-3dbe931050c8" Name="FileLeafRef" Required="true" />
+            <pnp:FieldRef ID="8c06beca-0777-48f7-91c7-6da68bc07b69" Name="Created" Hidden="true" />
+            <pnp:FieldRef ID="fa564e0f-0c70-4ab9-b863-0177e6ddd247" Name="Title" />
+            <pnp:FieldRef ID="28cf69c5-fa48-462a-b5cd-27b6f9d2bd5f" Name="Modified" Hidden="true" />
+            <pnp:FieldRef ID="822c78e3-1ea9-4943-b449-57863ad33ca9" Name="Modified_x0020_By" />
+            <pnp:FieldRef ID="4dd7e525-8d6b-4cb4-9d3e-44ee25f973eb" Name="Created_x0020_By" />
+            <pnp:FieldRef ID="ca6d4bf6-f9fe-46c4-ae52-45f4b5d9dc7a" Name="mvTo" />
+            <pnp:FieldRef ID="c218c8ad-942f-45d0-9735-6e30d11fac2a" Name="mvFrom" />
+            <pnp:FieldRef ID="f8706816-413b-4e25-8972-b69ed7ee0487" Name="mvCC" />
+            <pnp:FieldRef ID="38d73b32-349d-4695-914a-72aaaf1839cd" Name="mvBCC" />
+            <pnp:FieldRef ID="6775ca14-9bcd-4568-a8cb-6a6e7d2bd402" Name="mvAttach_x0020_Count" />
+            <pnp:FieldRef ID="8918ff3f-2d47-479f-afbc-ed71571e8ae2" Name="mvConversationTopic" />
+            <pnp:FieldRef ID="e160c0b3-fe16-4132-84dc-bf82837c6cc8" Name="mvMessageID" />
+            <pnp:FieldRef ID="05619d50-29e0-4e67-8563-4d1b69fb9cb2" Name="mvImportance" />
+            <pnp:FieldRef ID="e25e461e-afed-4984-9834-153b65f8055f" Name="mvOriginal_x0020_Author" />
+            <pnp:FieldRef ID="5a71bcfa-ccd5-4f24-af52-8ed5df336668" Name="mvOriginal_x0020_Created" />
+            <pnp:FieldRef ID="d9f27c42-fe75-4d0f-881b-e353638a13e4" Name="mvOriginal_x0020_Modified" />
+            <pnp:FieldRef ID="4af91665-7ec3-4ba3-a262-54652bd8b473" Name="mvOriginal_x0020_Producer" />
+            <pnp:FieldRef ID="abe3cc77-e806-4297-8739-c435a27998a3" Name="mvOriginal_x0020_FileName" />
+            <pnp:FieldRef ID="83599b91-819f-4974-a9e0-31bb64570a5a" Name="mvReceivedTime" />
+            <pnp:FieldRef ID="2b419db5-4e99-4da1-8ac2-327409ba562d" Name="mvSensitivity" />
+            <pnp:FieldRef ID="11196889-ccb9-43f6-a378-7a1d2ae1ae92" Name="mvSentOn" />
+            <pnp:FieldRef ID="8a522278-4487-459c-ae7b-e96f6ee55020" Name="mvHasAttachments" />
+            <pnp:FieldRef ID="870a5584-7868-4b82-9314-50ee04eb2c5e" Name="mvAttachmentIcon" />
+            <pnp:FieldRef ID="ca0f980f-8f12-4c3c-9054-cfb9cb8e0d54" Name="mvSubject" />
+            <pnp:FieldRef ID="00e8ec3b-060c-4532-85c7-475f46169d42" Name="mvTrackingTag" />
+          </pnp:FieldRefs>
+        </pnp:ContentType>
+        <pnp:ContentType ID="0x010100776D10CC9E0943CEA6FE18350BDDD96D" Name="MacroView Document" Description="Create a new document." Group="MacroView DMF Content Types" NewFormUrl="" EditFormUrl="" DisplayFormUrl="">
+          <pnp:FieldRefs>
+            <pnp:FieldRef ID="c042a256-787d-4a6f-8a8a-cf6ab767f12d" Name="ContentType" />
+            <pnp:FieldRef ID="5f47e085-2150-41dc-b661-442f3027f552" Name="SelectFilename" />
+            <pnp:FieldRef ID="8553196d-ec8d-4564-9861-3dbe931050c8" Name="FileLeafRef" Required="true" />
+            <pnp:FieldRef ID="8c06beca-0777-48f7-91c7-6da68bc07b69" Name="Created" Hidden="true" />
+            <pnp:FieldRef ID="fa564e0f-0c70-4ab9-b863-0177e6ddd247" Name="Title" />
+            <pnp:FieldRef ID="28cf69c5-fa48-462a-b5cd-27b6f9d2bd5f" Name="Modified" Hidden="true" />
+            <pnp:FieldRef ID="822c78e3-1ea9-4943-b449-57863ad33ca9" Name="Modified_x0020_By" />
+            <pnp:FieldRef ID="4dd7e525-8d6b-4cb4-9d3e-44ee25f973eb" Name="Created_x0020_By" />
+            <pnp:FieldRef ID="e25e461e-afed-4984-9834-153b65f8055f" Name="mvOriginal_x0020_Author" />
+            <pnp:FieldRef ID="5a71bcfa-ccd5-4f24-af52-8ed5df336668" Name="mvOriginal_x0020_Created" />
+            <pnp:FieldRef ID="d9f27c42-fe75-4d0f-881b-e353638a13e4" Name="mvOriginal_x0020_Modified" />
+            <pnp:FieldRef ID="4af91665-7ec3-4ba3-a262-54652bd8b473" Name="mvOriginal_x0020_Producer" />
+            <pnp:FieldRef ID="abe3cc77-e806-4297-8739-c435a27998a3" Name="mvOriginal_x0020_FileName" />
+          </pnp:FieldRefs>
+        </pnp:ContentType>
+        <pnp:ContentType ID="0x01010078DA018BC2464D4192614773735FF606" Name="MacroView All Documents" Description="Create a new document." Group="MacroView DMF Content Types" NewFormUrl="" EditFormUrl="" DisplayFormUrl="">
+          <pnp:FieldRefs>
+            <pnp:FieldRef ID="c042a256-787d-4a6f-8a8a-cf6ab767f12d" Name="ContentType" />
+            <pnp:FieldRef ID="5f47e085-2150-41dc-b661-442f3027f552" Name="SelectFilename" />
+            <pnp:FieldRef ID="8553196d-ec8d-4564-9861-3dbe931050c8" Name="FileLeafRef" Required="true" />
+            <pnp:FieldRef ID="8c06beca-0777-48f7-91c7-6da68bc07b69" Name="Created" Hidden="true" />
+            <pnp:FieldRef ID="fa564e0f-0c70-4ab9-b863-0177e6ddd247" Name="Title" />
+            <pnp:FieldRef ID="28cf69c5-fa48-462a-b5cd-27b6f9d2bd5f" Name="Modified" Hidden="true" />
+            <pnp:FieldRef ID="822c78e3-1ea9-4943-b449-57863ad33ca9" Name="Modified_x0020_By" />
+            <pnp:FieldRef ID="4dd7e525-8d6b-4cb4-9d3e-44ee25f973eb" Name="Created_x0020_By" />
+            <pnp:FieldRef ID="ca6d4bf6-f9fe-46c4-ae52-45f4b5d9dc7a" Name="mvTo" />
+            <pnp:FieldRef ID="c218c8ad-942f-45d0-9735-6e30d11fac2a" Name="mvFrom" />
+            <pnp:FieldRef ID="f8706816-413b-4e25-8972-b69ed7ee0487" Name="mvCC" />
+            <pnp:FieldRef ID="38d73b32-349d-4695-914a-72aaaf1839cd" Name="mvBCC" />
+            <pnp:FieldRef ID="6775ca14-9bcd-4568-a8cb-6a6e7d2bd402" Name="mvAttach_x0020_Count" />
+            <pnp:FieldRef ID="8918ff3f-2d47-479f-afbc-ed71571e8ae2" Name="mvConversationTopic" />
+            <pnp:FieldRef ID="e160c0b3-fe16-4132-84dc-bf82837c6cc8" Name="mvMessageID" />
+            <pnp:FieldRef ID="05619d50-29e0-4e67-8563-4d1b69fb9cb2" Name="mvImportance" />
+            <pnp:FieldRef ID="e25e461e-afed-4984-9834-153b65f8055f" Name="mvOriginal_x0020_Author" />
+            <pnp:FieldRef ID="5a71bcfa-ccd5-4f24-af52-8ed5df336668" Name="mvOriginal_x0020_Created" />
+            <pnp:FieldRef ID="d9f27c42-fe75-4d0f-881b-e353638a13e4" Name="mvOriginal_x0020_Modified" />
+            <pnp:FieldRef ID="4af91665-7ec3-4ba3-a262-54652bd8b473" Name="mvOriginal_x0020_Producer" />
+            <pnp:FieldRef ID="abe3cc77-e806-4297-8739-c435a27998a3" Name="mvOriginal_x0020_FileName" />
+            <pnp:FieldRef ID="83599b91-819f-4974-a9e0-31bb64570a5a" Name="mvReceivedTime" />
+            <pnp:FieldRef ID="2b419db5-4e99-4da1-8ac2-327409ba562d" Name="mvSensitivity" />
+            <pnp:FieldRef ID="11196889-ccb9-43f6-a378-7a1d2ae1ae92" Name="mvSentOn" />
+            <pnp:FieldRef ID="00e8ec3b-060c-4532-85c7-475f46169d42" Name="mvTrackingTag" />
+            <pnp:FieldRef ID="8a522278-4487-459c-ae7b-e96f6ee55020" Name="mvHasAttachments" />
+            <pnp:FieldRef ID="870a5584-7868-4b82-9314-50ee04eb2c5e" Name="mvAttachmentIcon" />
+            <pnp:FieldRef ID="ca0f980f-8f12-4c3c-9054-cfb9cb8e0d54" Name="mvSubject" />
+          </pnp:FieldRefs>
+        </pnp:ContentType>
+      </pnp:ContentTypes>
+    </pnp:ProvisioningTemplate>
+  </pnp:Templates>
+</pnp:Provisioning>

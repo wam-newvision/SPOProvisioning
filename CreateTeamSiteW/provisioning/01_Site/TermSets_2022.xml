@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<pnp:Provisioning xmlns:pnp="http://schemas.dev.office.com/PnP/2022/09/ProvisioningSchema">
+  <pnp:Templates>
+    <pnp:ProvisioningTemplate ID="TermSets">
+      <pnp:TermGroups>
+        <pnp:TermGroup Name="{sitecollectiontermgroupname}" SiteCollectionTermGroup="true" UpdateBehavior="Overwrite">
+          <pnp:TermSets>
+            <pnp:TermSet Name="Document Type">
+              <pnp:Terms>
+                <pnp:Term Name="Interne Information" />
+                <pnp:Term Name="Kunden-Korrespondenz" />
+                <pnp:Term Name="Dokumentation" />
+                <pnp:Term Name="Email" />
+                <pnp:Term Name="Protokoll" />
+              </pnp:Terms>
+            </pnp:TermSet>
+            <pnp:TermSet Name="Project Status">
+              <pnp:Terms>
+                <pnp:Term Name="warten auf GO" />
+                <pnp:Term Name="aktiv" />
+                <pnp:Term Name="pausiert" />
+                <pnp:Term Name="beendet" />
+                <pnp:Term Name="archiviert" />
+              </pnp:Terms>
+            </pnp:TermSet>
+            <pnp:TermSet Name="Project Type">
+              <pnp:Terms>
+                <pnp:Term Name="Bildungseinrichtung" />
+                <pnp:Term Name="Gesundheitseinrichtung" />
+                <pnp:Term Name="privater Auftraggeber" />
+                <pnp:Term Name="öffentlicher Auftraggeber" />
+                <pnp:Term Name="Industrie" />
+                <pnp:Term Name="Gewerbe" />
+              </pnp:Terms>
+            </pnp:TermSet>
+          </pnp:TermSets>
+        </pnp:TermGroup>
+      </pnp:TermGroups>
+    </pnp:ProvisioningTemplate>
+  </pnp:Templates>
+</pnp:Provisioning>
