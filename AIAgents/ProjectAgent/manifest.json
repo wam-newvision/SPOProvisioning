@@ -1,5 +1,5 @@
 {
-    "version": "1.0.3",
+    "version": "1.0.4",
     "id": "0afe0b09-4a68-42bc-8f49-cce54568f686",
     "developer": {
         "name": "Markus Wagner",
@@ -22,7 +22,7 @@
     "accentColor": "#07687d",
     "configurableTabs": [
         {
-        "configurationUrl": "https://go.microsoft.com/fwlink/?linkid=2138949",
+        "configurationUrl": "https://delightful-mushroom-05e70a703.1.azurestaticapps.net/",
         "scopes": ["team"]
         }
     ],
