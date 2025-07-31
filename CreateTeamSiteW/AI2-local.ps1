@@ -172,7 +172,6 @@ if ($teamsAppId) {
     $noAPP = $true
 }
 
-$noAPP = $false
 if ($noAPP) {
     Log "⬆️  Lade neue Teams-App hoch..."
     $zipBytes = [System.IO.File]::ReadAllBytes($zipPath)
@@ -226,11 +225,27 @@ foreach ($app in $installedApps.value) {
 
 if (-not $installed) {
     Log "📦 Installiere App im Team..."
-    $installBody = [ordered]@{}
-    $installBody."teamsApp@odata.bind" = "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps('$teamsAppId')"
-    Invoke-MgGraphRequest -Method POST `
-        -Uri "https://graph.microsoft.com/v1.0/teams/$teamId/installedApps" `
-        -Body ($installBody | ConvertTo-Json -Depth 10)
+    $lowlevel = $false
+    if ($lowlevel) {
+        # Variante Low Level (Invoke-MgGraphRequest)
+        Log "Install APP mit Variante 'low level'..."
+        $installBody = [ordered]@{}
+        $installBody."teamsApp@odata.bind" = "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps('$teamsAppId')"
+        Invoke-MgGraphRequest -Method POST `
+            -Uri "https://graph.microsoft.com/v1.0/teams/$teamId/installedApps" `
+            -Body ($installBody | ConvertTo-Json -Depth 10)
+    } else {
+        Log "Install APP mit Variante 'HIGH level'..."
+        # Variante High Level (Microsoft.Graph.Teams)
+        #$teamsAppId = "0ae35b36-0fd7-422e-805b-d53af1579093" # Sharepoint Pages and Lists App ID
+        #$teamsAppId = "bd871fde-dc2d-49af-a140-59693a6a1d33" # Project Manager Agent App ID
+        $paramsApp = @{
+            'teamsApp@odata.bind' = "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/$teamsAppId"
+        }
+        Log "Binde die TeamsAPP '$TabDisplayName' in das Team '$alias' / Channel '$channelName' ein..."
+        New-MgTeamInstalledApp -TeamId $teamId -BodyParameter $paramsApp
+    }
+    
     Start-Sleep -Seconds 10 # Warte, bis App bereit ist
     Log "App installiert."
 }
@@ -256,9 +271,8 @@ if (-not $installed) {
 
 # Für SharePoint-Seiten:
 # Installiere Teams App ins Team (Scope: Team)
-
-$teamsAppId     = "com.microsoft.teamspace.tab.web.site" # SharePoint Pages and Lists-Tab
-$contentUrl     = "https://mwpnewvision.sharepoint.com/sites/1578/SitePages/Forms/ByAuthor.aspx"
+#$teamsAppId     = "com.microsoft.teamspace.tab.web.site" # SharePoint Pages and Lists-Tab
+#$contentUrl     = "https://mwpnewvision.sharepoint.com/sites/1578/SitePages/Forms/ByAuthor.aspx"
 #$contentUrl     = "https://mwpnewvision.sharepoint.com/sites/projekte/Test1/Forms/AllItems.aspx"
 
 # ------------------------------------------------------------------------
@@ -279,6 +293,9 @@ if ($PnP) {
     Connect-PnP -Tenant $tenantId -SPOUrl $adminUrl -ClientId $ClientId -PfxPath $PfxPath -PfxPassword $PfxPassword
     $team = Get-PnPTeamsTeam -Identity $alias -ErrorAction Stop
 
+    # Test URL:
+    $contentUrl = "https://mwpnewvision.sharepoint.com/sites/1578/Shared Documents/Forms/AllItems.aspx"
+
     AddTeamsTab `
         -team $team `
         -TeamsChannel $channel `
@@ -288,17 +305,9 @@ if ($PnP) {
 
 } else {
     Log "PnP nicht verfügbar, nutze Graph-API zum Hinzufügen des Tabs..."
-    #$AppID = "0ae35b36-0fd7-422e-805b-d53af1579093" # Sharepoint Pages and Lists App ID
-    $AppID = "bd871fde-dc2d-49af-a140-59693a6a1d33" # Project Manager Agent App ID
-    $paramsApp = @{
-        'teamsApp@odata.bind' = "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/$AppID"
-    }
-    Log "Binde die TeamsAPP '$TabDisplayName' in das Team '$alias' / Channel '$channelName' ein..."
-    New-MgTeamInstalledApp -TeamId $teamId -BodyParameter $paramsApp
-
     $paramsTab = @{
         displayName = $tabDisplayName
-        'teamsApp@odata.bind' = "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/$AppID"
+        'teamsApp@odata.bind' = "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/$teamsAppId"
         #configuration = @{
         #    contentUrl = $contentUrl
         #    websiteUrl = $contentUrl
@@ -306,7 +315,6 @@ if ($PnP) {
     }
     Log "Erstelle Teams-Register '$TabDisplayName' im Team '$alias' / Channel '$channelName' ..."
     New-MgTeamChannelTab -TeamId $teamId -ChannelId $channelId -BodyParameter $paramsTab
-
 }
 
 <# # Beispielaufruf der Graph-Helper-Funktion Add-GraphTeamsTab
