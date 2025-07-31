@@ -7,7 +7,7 @@ param(
     [string]$Site,                              # Teams Name (wie in Teams angezeigt)
     [string]$channelName    = "General",        # Kanalname (Standard: "Allgemein")
     [string]$tabDisplayName = "ProjectAgent",   # Tab-Name
-    [string]$AgentVersion   = "105"             # Agent (=zipfile) Version
+    [string]$AgentVersion   = "107"             # Agent (=zipfile) Version
 )
 
 # --------------------------------------------------------------------
@@ -172,6 +172,7 @@ if ($teamsAppId) {
     $noAPP = $true
 }
 
+$noAPP = $false
 if ($noAPP) {
     Log "⬆️  Lade neue Teams-App hoch..."
     $zipBytes = [System.IO.File]::ReadAllBytes($zipPath)
