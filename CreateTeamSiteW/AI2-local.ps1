@@ -4,10 +4,10 @@
 # ========================================================================
 
 param(
-    [string]$Site,                      # Teams Name (wie in Teams angezeigt)
-    [string]$channelName    = "General",   # Kanalname (Standard: "Allgemein")
-    [string]$tabDisplayName = "AI Agent",  # Tab-Name
-    [string]$zipPath        = "$PSScriptRoot\AIAgents\zip\AIAgent105.zip" # Exportiertes Copilot Studio ZIP
+    [string]$Site,                              # Teams Name (wie in Teams angezeigt)
+    [string]$channelName    = "General",        # Kanalname (Standard: "Allgemein")
+    [string]$tabDisplayName = "ProjectAgent",   # Tab-Name
+    [string]$AgentVersion   = "105"             # Agent (=zipfile) Version
 )
 
 # --------------------------------------------------------------------
@@ -22,6 +22,8 @@ param(
 # --------------------------------------------------------------------
 #$FktPath      = "C:\Functions\dms-provisioning\CreateTeamSiteW"
 $FktPath      = $PSScriptRoot
+$zipPath      = Join-Path $PSScriptRoot "AIAgents\zip\$tabDisplayName$AgentVersion.zip" # Exportiertes Copilot Studio ZIP
+Log "Zip-Datei: " $zipPath
 
 $ClientId     = "5a19516e-dc54-4d2f-aebc-f1b679a69457"
 #$clientSecret = $env:AZURE_CLIENT_SECRET
@@ -156,16 +158,22 @@ foreach ($app in $matchingApps) {
 
 if ($teamsAppId) {
     Log "Teams-App bereits im Katalog: $teamsAppId"
+    Log "❌ Lösche Teams-App aus dem App-Katalog: $teamsAppId"
+    Invoke-MgGraphRequest -Method DELETE `
+        -Uri "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/$teamsAppId"
+    Log "App wurde entfernt."
 } else {
-    Log "⬆️  Lade neue Teams-App hoch..."
-    $zipBytes = [System.IO.File]::ReadAllBytes($zipPath)
-    $response = Invoke-MgGraphRequest -Method POST `
-        -Uri "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps" `
-        -Body $zipBytes `
-        -ContentType "application/zip"
-    $teamsAppId = $response.id
-    Log "Neue App bereitgestellt: $teamsAppId"
+    Log "⚠️  Keine App-ID gefunden – nichts zu löschen."
 }
+
+Log "⬆️  Lade neue Teams-App hoch..."
+$zipBytes = [System.IO.File]::ReadAllBytes($zipPath)
+$response = Invoke-MgGraphRequest -Method POST `
+    -Uri "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps" `
+    -Body $zipBytes `
+    -ContentType "application/zip"
+$teamsAppId = $response.id
+Log "Neue App bereitgestellt: $teamsAppId"
 
 # 6. Team und Kanal suchen
 Log "🔍 Suche Team '$Site'..."
@@ -269,23 +277,24 @@ if ($PnP) {
         -TabType WebSite
 
 } else {
-    # PnP nicht verfügbar, nutze Graph-API
     Log "PnP nicht verfügbar, nutze Graph-API zum Hinzufügen des Tabs..."
     #$AppID = "0ae35b36-0fd7-422e-805b-d53af1579093" # Sharepoint Pages and Lists App ID
     $AppID = "bd871fde-dc2d-49af-a140-59693a6a1d33" # Project Manager Agent App ID
     $paramsApp = @{
         'teamsApp@odata.bind' = "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/$AppID"
     }
+    Log "Binde die TeamsAPP '$TabDisplayName' in das Team '$alias' / Channel '$channelName' ein..."
     New-MgTeamInstalledApp -TeamId $teamId -BodyParameter $paramsApp
 
     $paramsTab = @{
-        displayName = "AI Agent"
+        displayName = $tabDisplayName
         'teamsApp@odata.bind' = "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/$AppID"
         #configuration = @{
         #    contentUrl = $contentUrl
         #    websiteUrl = $contentUrl
         #}
     }
+    Log "Erstelle Teams-Register '$TabDisplayName' im Team '$alias' / Channel '$channelName' ..."
     New-MgTeamChannelTab -TeamId $teamId -ChannelId $channelId -BodyParameter $paramsTab
 
 }
