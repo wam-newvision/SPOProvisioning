@@ -1,8 +1,8 @@
 {
-    "version": "1.0.7",
+    "version": "1.0.8",
     "id": "0afe0b09-4a68-42bc-8f49-cce54568f686",
     "developer": {
-        "name": "NewVision WAM 1.0.7",
+        "name": "NewVision WAM 1.0.8",
         "websiteUrl": "https://delightful-mushroom-05e70a703.1.azurestaticapps.net/index.html",
         "privacyUrl": "https://www.newvision.eu/datenschutz",
         "termsOfUseUrl": "https://www.newvision.eu/impressum"
@@ -23,7 +23,7 @@
     "configurableTabs": [
         {
         "configurationUrl": "https://delightful-mushroom-05e70a703.1.azurestaticapps.net/index.html",
-        "scopes": ["team"]
+        "scopes": ["team", "groupChat"]
         }
     ],
     "bots": [
@@ -82,7 +82,8 @@
         "*.botframework.com",
         "*.*.botframework.com",
         "copilotstudio.microsoft.com",
-        "copilotstudio.preview.microsoft.com"
+        "copilotstudio.preview.microsoft.com",
+        "delightful-mushroom-05e70a703.1.azurestaticapps.net"
     ],
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.22/MicrosoftTeams.schema.json",
     "manifestVersion": "1.22"
