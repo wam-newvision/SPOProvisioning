@@ -7,7 +7,7 @@ param(
     [string]$Site,                      # Teams Name (wie in Teams angezeigt)
     [string]$channelName    = "General",   # Kanalname (Standard: "Allgemein")
     [string]$tabDisplayName = "AI Agent",  # Tab-Name
-    [string]$zipPath        = "C:\Functions\TeamsAPPs\AIAgent\AIAgent103.zip" # Exportiertes Copilot Studio ZIP
+    [string]$zipPath        = "$PSScriptRoot\AIAgents\zip\AIAgent105.zip" # Exportiertes Copilot Studio ZIP
 )
 
 # --------------------------------------------------------------------
