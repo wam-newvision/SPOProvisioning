@@ -1,0 +1,90 @@
+{
+    "version": "1.0.8",
+    "id": "0afe0b09-4a68-42bc-8f49-cce54568f686",
+    "developer": {
+        "name": "NewVision WAM 1.0.8",
+        "websiteUrl": "https://delightful-mushroom-05e70a703.1.azurestaticapps.net/index.html",
+        "privacyUrl": "https://www.newvision.eu/datenschutz",
+        "termsOfUseUrl": "https://www.newvision.eu/impressum"
+    },
+    "name": {
+        "short": "Project Manager",
+        "full": "Project Manager"
+    },
+    "description": {
+        "short": "Erstellt mit Microsoft Copilot Studio",
+        "full": "Helfen Sie den Mitarbeitern, informiert, produktiv und verbunden zu bleiben. Erstellen Sie Copiloten, indem Sie ihre Funktionen beschreiben und ihnen Wissensquellen hinzuf\u00FCgen, und sehen Sie, wie sie jede Frage in wenigen Minuten beantworten."
+    },
+    "icons": {
+        "outline": "outline.png",
+        "color": "color.png"
+    },
+    "accentColor": "#07687d",
+    "configurableTabs": [
+        {
+        "configurationUrl": "https://delightful-mushroom-05e70a703.1.azurestaticapps.net/index.html",
+        "scopes": ["team", "groupChat"]
+        }
+    ],
+    "bots": [
+        {
+            "botId": "0afe0b09-4a68-42bc-8f49-cce54568f686",
+            "isNotificationOnly": false,
+            "supportsFiles": true,
+            "scopes": [
+                "personal",
+                "team"
+            ],
+            "commandLists": [
+                {
+                    "scopes": [
+                        "personal",
+                        "team"
+                    ],
+                    "commands": [
+                        {
+                            "title": "Informationen abrufen",
+                            "description": "Welche Informationen sind in der SharePoint-Standardbibliothek verf\u00FCgbar?"
+                        },
+                        {
+                            "title": "Dateien suchen",
+                            "description": "Finde die Datei \u0027Projektplan\u0027 in der SharePoint-Standardbibliothek."
+                        },
+                        {
+                            "title": "Projektstatus",
+                            "description": "Was ist der aktuelle Status des Projekts \u0027Neues Produkt\u0027?"
+                        },
+                        {
+                            "title": "Teammitglieder",
+                            "description": "Wer sind die Teammitglieder des Projekts \u0027Neues Produkt\u0027?"
+                        },
+                        {
+                            "title": "Dokumente aktualisieren",
+                            "description": "Wie kann ich das Dokument \u0027Projektplan\u0027 in der SharePoint-Standardbibliothek aktualisieren?"
+                        },
+                        {
+                            "title": "Projektzeitplan",
+                            "description": "Was ist der Zeitplan f\u00FCr das Projekt \u0027Neues Produkt\u0027?"
+                        }
+                    ]
+                }
+            ],
+            "registrationInfo": {
+                "source": "microsoftCopilotStudio",
+                "environment": "Default-13dc993c-6057-4ed5-add2-ac25d9dcb7c0",
+                "schemaName": "cr35b_projectManager",
+                "clusterCategory": "prod"
+            },
+            "supportsCalling": true
+        }
+    ],
+    "validDomains": [
+        "*.botframework.com",
+        "*.*.botframework.com",
+        "copilotstudio.microsoft.com",
+        "copilotstudio.preview.microsoft.com",
+        "delightful-mushroom-05e70a703.1.azurestaticapps.net"
+    ],
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.22/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.22"
+}

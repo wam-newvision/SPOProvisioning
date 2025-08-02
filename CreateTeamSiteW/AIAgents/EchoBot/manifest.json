@@ -1,0 +1,59 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.22/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.22",
+  "version": "2.1.2",
+  "id": "e1fd616c-8f17-43b7-bf23-593e440596e3",
+  "developer": {
+    "name": "NewVision Software GmbH",
+    "websiteUrl": "https://www.newvision.eu",
+    "privacyUrl": "https://www.newvision.eu/datenschutz",
+    "termsOfUseUrl": "https://www.newvision.eu/impressum"
+  },
+  "description": {
+    "short": "Echo Bot Demo",
+    "full": "Dies ist ein Demo-Bot für Teams."
+  },
+  "name": {
+    "short": "EchoBot",
+    "full": "EchoBot für Teams"
+  },
+  "icons": {
+    "outline": "outline.png",
+    "color": "color.png"
+  },
+  "accentColor": "#07687d",
+  "staticTabs": [
+    {
+      "entityId": "teaminfotab",
+      "name": "Teams Info",
+      "contentUrl": "https://c04493a3b63d.ngrok-free.app",
+      "websiteUrl": "https://c04493a3b63d.ngrok-free.app",
+      "scopes": [ "personal" ]
+    }
+  ],
+  "configurableTabs": [
+    {
+      "configurationUrl": "https://c04493a3b63d.ngrok-free.app/config.html",
+      "canUpdateConfiguration": true,
+      "scopes": [ "team" ]
+    }
+  ],
+  "bots": [
+    {
+      "botId": "e1fd616c-8f17-43b7-bf23-593e440596e3",
+      "isNotificationOnly": false,
+      "supportsFiles": false,
+      "scopes": [
+        "personal",
+        "team"
+      ]
+    }
+  ],
+  "permissions": [ "identity", "messageTeamMembers" ],
+  "validDomains": [
+    "c04493a3b63d.ngrok-free.app",
+	"daad01dbd1f0.ngrok-free.app",
+    "delightful-mushroom-05e70a703.1.azurestaticapps.net",
+    "www.newvision.eu"
+  ]
+}
