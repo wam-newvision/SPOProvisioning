@@ -241,7 +241,7 @@ if ($TeamsTab) {
     #$TabType = [TabType]::WebSite  # Typ des Tabs (z.B. SharePointPageAndList, WebSite, etc.)
     $TabDisplayName = "AI Agent"  # Name des Tabs
     #$TeamsTabURL = "https://newvision.eu/impressum/"
-    $TeamsTabURL = "https://mwpnewvision.sharepoint.com/sites/1578/SitePages/Forms/ByAuthor.aspx"
+    $TeamsTabURL = "https://mwpnewvision.sharepoint.com/sites/$alias/SitePages/Forms/ByAuthor.aspx"
     #$WebSiteUrlDisplayName = "NewVision"  # DisplayName der Website, die im Tab angezeigt werden soll
 
     # Tab hinzufügen

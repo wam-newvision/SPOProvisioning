@@ -62,12 +62,14 @@ function EvaluateRequestParameters {
         }
     }
 
-    # Optional: Optionale Felder auf $null setzen, wenn nicht übergeben
+    # Optional: Optionale Felder auf Default setzen, wenn nicht übergeben
     foreach ($op in $OptionalParams) {
         $name = $op.Name
         $default = $op.Default
+        Log "Process optional parameter: '$name' ..."
         if (-not $params.ContainsKey($name) -or $params[$name] -eq "" -or $null -eq $params[$name]) {
             $params[$name] = $default
+            Log "Use default Value: '$name' = '$($params[$name])'"
         }
     }
 

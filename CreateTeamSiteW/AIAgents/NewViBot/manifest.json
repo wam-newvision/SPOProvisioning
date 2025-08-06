@@ -1,8 +1,8 @@
 {
   "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.22/MicrosoftTeams.schema.json",
   "manifestVersion": "1.22",
-  "version": "2.1.9",
-  "id": "e1fd616c-8f17-43b7-bf23-593e440596e3",
+  "version": "1.0.1",
+  "id": "2a357162-7738-459a-b727-8039af89a684",
   "developer": {
     "name": "NewVision Software GmbH",
     "websiteUrl": "https://www.newvision.eu",
@@ -10,12 +10,12 @@
     "termsOfUseUrl": "https://www.newvision.eu/impressum"
   },
   "description": {
-    "short": "Echo Bot Demo",
+    "short": "NewVi Bot",
     "full": "Dies ist ein Demo-Bot für Teams."
   },
   "name": {
-    "short": "EchoBot",
-    "full": "EchoBot für Teams"
+    "short": "NewViBot",
+    "full": "NewViBot für Teams"
   },
   "icons": {
     "outline": "outline.png",
@@ -40,7 +40,7 @@
   ],
   "bots": [
     {
-      "botId": "e1fd616c-8f17-43b7-bf23-593e440596e3",
+      "botId": "2a357162-7738-459a-b727-8039af89a684",
       "isNotificationOnly": false,
       "supportsFiles": false,
       "scopes": [
@@ -56,7 +56,7 @@
     "www.newvision.eu"
   ],
   "webApplicationInfo": {
-    "id": "e1fd616c-8f17-43b7-bf23-593e440596e3",
-    "resource": "api://a43fdd098192.ngrok-free.app/e1fd616c-8f17-43b7-bf23-593e440596e3"
+    "id": "2a357162-7738-459a-b727-8039af89a684",
+    "resource": "api://2a357162-7738-459a-b727-8039af89a684"
   }
 }

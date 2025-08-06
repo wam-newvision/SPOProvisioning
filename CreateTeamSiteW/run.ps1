@@ -49,11 +49,13 @@ try {
 
     # Optionale Felder (nur falls nötig)
     $optionalParams = @(
-        @{ Name = "DMSdrive"; Default = "DMS" },
+        @{ Name = "DMSdrive"; Default = $null },
         @{ Name = "SetRegion"; Default = "1031" },    # 1031 = Deutsch (Deutschland)
         @{ Name = "SetTimezone"; Default = "" },      # 4 = Mitteleuropäische Zeit (Berlin, Wien, Zürich), nur setzen, wenn Region != 1031
+        @{ Name = "TabDisplayName"; Default = "AI Agent" },   # Name des Tabs
+        @{ Name = "TeamsTabURL"; Default = "https://mwpnewvision.sharepoint.com/sites/projekte" },      # URL for Teams Tab (e.g. "https://mwpnewvision.sharepoint.com/sites/contoso/SitePages/Forms/ByAuthor.aspx")
         @{ Name = "SetSortOrder"; Default = "" }      # 25 = Deutsch, nur setzen, wenn Region != 1031
-        )
+    )
 
     # Definierte xxx...Params Felder auf Vorhandensein prüfen und auswerten
     $params = EvaluateRequestParameters -Request $Request -RequiredParams $requiredParams -BooleanParams $booleanParams -OptionalParams $optionalParams
@@ -68,7 +70,8 @@ try {
     }
 
     foreach ($param in $optionalParams) {
-        Set-Variable -Name $param -Value $params[$param]
+        $paramName = $param.Name
+        Set-Variable -Name $paramName -Value $params[$paramName]
     }
 
     # --------------------------------------------------------------------
@@ -114,7 +117,7 @@ try {
     # 6) Sharepoint-Site anlegen
     # --------------------------------------------------------------------
     # 1. Neue Site anlegen
-    Log "Create Sharepoint-Site $siteTitle ..."
+    Log "Create Sharepoint-Site $siteTitle for Region: '$SetRegion' ..."
     $Region    = [int]$SetRegion
     New-PnPSite -Type TeamSite -Title $siteTitle -Alias $alias -Lcid $Region -Wait -ErrorAction Stop
     Log "✅ Site created"
@@ -226,16 +229,18 @@ try {
     Log "Standard Library: '$libName' erstellt und verfügbar"
     
     # ----------------------------------------------------------------
-    # Teams Tab anlegen (zB AI Agent oder Websuche oder Sharepoint Site)
+    # Default Channel im Team finden
     # ----------------------------------------------------------------
     Log "Find Default Channel for Team '$alias' ..."
     $channels = $null
     $maxTries = 20
     $waitSeconds = 3
 
+    Log "📢 Suche nach Channels im Team '$alias', ID: '$($team.GroupId)' ..."
+
     for ($i=1; $i -le $maxTries; $i++) {
         try {
-            $channels = Get-PnPTeamsChannel -Team $team.Id -ErrorAction Stop
+            $channels = Get-PnPTeamsChannel -Team $team.GroupId -ErrorAction Stop
             if ($channels -and $channels.Count -gt 0) {
                 Log "✅ Es wurden $($channels.Count) Kanäle gefunden (nach $i Versuch(en))"
                 break
@@ -247,21 +252,24 @@ try {
     }
 
     if (-not $channels -or $channels.Count -eq 0) {
-        throw "❌ Es konnten keine Channels für das Team $alias gefunden werden!"
+        throw "❌ Es konnten keine Channels für das Team '$alias' gefunden werden!"
     }
 
     if($channels) {
         $channel  = $channels | Select-Object -First 1
-        Log "📢 Default Channel: $($channel.DisplayName) (ID: $($channel.Id))"
+        Log "📢 Default Channel: '$($channel.DisplayName)' (ID: '$($channel.Id)')"
 
-        Log "Add AI-Tab to Team $alias in Channel $($channel.DisplayName) ..."
-        Add-PnPTeamsTab `
-            -Team $team.Id `
-            -Channel $channel.Id `
-            -DisplayName "AIBuddy" `
-            -Type WebSite `
-            -WebSiteUrl "https://www.newvision.eu/impressum" `
-            -WebSiteUrlDisplayName "AIBuddy" `
+        # ----------------------------------------------------------------
+        # Teams Tab im Default Channel anlegen (zB AI Agent oder Websuche oder Sharepoint Site)
+        # ----------------------------------------------------------------
+        Log "Add Teams-Tab to Team '$alias' in Channel '$($channel.DisplayName)' ..."
+
+        AddTeamsTab `
+            -team $team `
+            -TeamsChannel $channel `
+            -TabDisplayName $TabDisplayName `
+            -WebSiteUrl $TeamsTabURL `
+            -TabType WebSite
 
             #-Type SharePointPageAndList `
             #-WebSiteUrl "https://tenant.sharepoint.com/sites/site/Lists/list/AllItems.aspx"
