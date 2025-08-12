@@ -41,6 +41,7 @@ try {
 
     # Boolean Felder (true/false), wenn nicht angegeben, dann true
     $booleanParams = @(
+        "TeamsTabAfterProvisioning", # true = Teams Tab anlegen nach Provisioning
         "structureInDefaultChannelFolder",
         "enableProvisioning",
         "enableDocumentSets",
@@ -84,10 +85,52 @@ try {
     # --------------------------------------------------------------------
     $base     = $tenantId.Split('.')[0]
     $alias    = ($siteTitle -replace '\s+', '')
+    $teamId   = $alias  # Standardmäßig Alias als TeamId verwenden
     $siteUrl  = "https://${base}.sharepoint.com/sites/$alias"
     $adminUrl = "https://${base}-admin.sharepoint.com"
     Log "🔗 SiteUrl = $siteUrl"
 
+    # --------------------------------------------------------------------
+    # Teams Tab anlegen als getrennter Runspace (ohne PnP))
+    # --------------------------------------------------------------------
+    if (-not $TeamsTabAfterProvisioning) { 
+        Log "Teams Tab in eigenem Prozess anlegen..."
+
+        # Pfad zu deinem Tab-Skript (ohne PnP):
+        $tabScript = Join-Path $PSScriptRoot 'TeamsTab.ps1'
+        Log "Used Tab-Script: $tabScript"
+
+        $ContentUrl = "https://teams.sailing-ninoa.com"
+        $TeamsAppExternalId  = "2a357162-7738-459a-b727-8039af89a684"
+
+        # Payload als Datei ablegen, um Quote-Probleme zu vermeiden
+        $payloadJson = @{
+        TeamId             = $teamId
+        TenantId           = $tenantId
+        ChannelName        = ""
+        TabDisplayName     = $TabDisplayName
+        ContentUrl         = $ContentUrl
+        WebsiteUrl         = $ContentUrl
+        EntityId           = "AITab"
+        TeamsAppExternalId = $TeamsAppExternalId
+        } | ConvertTo-Json -Compress
+
+        $payloadFile = Join-Path $env:TEMP ("teams-tab-payload-{0}.json" -f ([guid]::NewGuid()))
+        Set-Content -Path $payloadFile -Value $payloadJson -Encoding UTF8 -NoNewline
+
+        Log "CallTeamsTab with tabscript $tabScript and payload file: $payloadFile ..."
+        CallTeamsTab -tabScript $tabScript -payloadFile $payloadFile
+
+        # --------------------------------------------------------------------
+        # gesamte Funktion beenden
+        # --------------------------------------------------------------------
+        Log "✅ Teams Tab in '$siteTitle' created successfully."
+        Send-Resp 200 @{ status = 'success'; siteUrl = $siteUrl }
+        return
+    }
+
+    # ====================================================================
+    # Start PnP PowerShell Modules for SharePoint Provisioning
     # --------------------------------------------------------------------
     # 3) Module laden (PnP.PowerShell)
     # --------------------------------------------------------------------
@@ -520,41 +563,35 @@ try {
     }
 
     # --------------------------------------------------------------------
-    # Teams Tab anlegen (als getrennter Prozess in einer eigenen PowerShell-Session ohne PnP)
+    # Teams Tab anlegen als getrennter Prozess in einer eigenen PS-Session
+    # --- Child-Prozess starten – komplett frische Session, kein PnP ---
     # --------------------------------------------------------------------
+    Log "Teams Tab in eigenem Prozess anlegen..."
 
     # Pfad zu deinem Tab-Skript (ohne PnP):
     $tabScript = Join-Path $PSScriptRoot 'TeamsTab.ps1'
+    Log "Used Tab-Script: $tabScript"
 
     $ContentUrl = "https://teams.sailing-ninoa.com"
     $TeamsAppExternalId  = "2a357162-7738-459a-b727-8039af89a684"
-    # Parameter (am besten als JSON übergeben)
-    $payload = @{
-    TeamId              = $teamId              # GUID oder Name/DeepLink
-    TenantId            = $tenantId            # e.g. "mwpnewvision.onmicrosoft.com",
-    ChannelName         = ""                   # leer => primaryChannel
-    TabDisplayName      = $TabDisplayName
-    ContentUrl          = $ContentUrl
-    WebsiteUrl          = $ContentUrl
-    EntityId            = "AITab"              # EntityId für den Tab (uniqe ID, free defined)
-    TeamsAppExternalId  = $TeamsAppExternalId   # Manifest-ID deiner Custom App
+
+    # Payload als Datei ablegen, um Quote-Probleme zu vermeiden
+    $payloadJson = @{
+    TeamId             = $teamId
+    TenantId           = $tenantId
+    ChannelName        = ""
+    TabDisplayName     = $TabDisplayName
+    ContentUrl         = $ContentUrl
+    WebsiteUrl         = $ContentUrl
+    EntityId           = "AITab"
+    TeamsAppExternalId = $TeamsAppExternalId
     } | ConvertTo-Json -Compress
 
-    # Child-Prozess starten – komplett frische Session, kein PnP
-    $psi = New-Object System.Diagnostics.ProcessStartInfo
-    $psi.FileName  = "pwsh"
-    $psi.Arguments = "-NoProfile -NonInteractive -File `"$tabScript`" --payload `"$payload`""
-    $psi.RedirectStandardOutput = $true
-    $psi.RedirectStandardError  = $true
-    $psi.UseShellExecute        = $false
-    $p = [System.Diagnostics.Process]::Start($psi)
-    $p.WaitForExit()
+    $payloadFile = Join-Path $env:TEMP ("teams-tab-payload-{0}.json" -f ([guid]::NewGuid()))
+    Set-Content -Path $payloadFile -Value $payloadJson -Encoding UTF8 -NoNewline
 
-    $out = $p.StandardOutput.ReadToEnd()
-    $err = $p.StandardError.ReadToEnd()
-
-    if ($p.ExitCode -ne 0) { throw "Tab-Skript fehlgeschlagen: $err" }
-    Log $out
+    Log "CallTeamsTab with tabscript $tabScript and payload file: $payloadFile ..."
+    CallTeamsTab -tabScript $tabScript -payloadFile $payloadFile
 
     # --------------------------------------------------------------------
     # Fertig
