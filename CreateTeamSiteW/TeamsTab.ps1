@@ -11,7 +11,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $PSModuleAutoloadingPreference = 'None'
-$env:DEBUG = 'true'
+#$env:DEBUG = 'true'
 
 # Logging + deine Add-GraphTeamsTab-Funktion
 . (Join-Path $PSScriptRoot 'helpers\LoggingFunctions.ps1')

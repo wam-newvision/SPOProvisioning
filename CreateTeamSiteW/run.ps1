@@ -519,6 +519,42 @@ try {
         }
     }
 
+    # --------------------------------------------------------------------
+    # Teams Tab anlegen (als getrennter Prozess in einer eigenen PowerShell-Session ohne PnP)
+    # --------------------------------------------------------------------
+
+    # Pfad zu deinem Tab-Skript (ohne PnP):
+    $tabScript = Join-Path $PSScriptRoot 'TeamsTab.ps1'
+
+    $ContentUrl = "https://teams.sailing-ninoa.com"
+    $TeamsAppExternalId  = "2a357162-7738-459a-b727-8039af89a684"
+    # Parameter (am besten als JSON übergeben)
+    $payload = @{
+    TeamId              = $teamId              # GUID oder Name/DeepLink
+    TenantId            = $tenantId            # e.g. "mwpnewvision.onmicrosoft.com",
+    ChannelName         = ""                   # leer => primaryChannel
+    TabDisplayName      = $TabDisplayName
+    ContentUrl          = $ContentUrl
+    WebsiteUrl          = $ContentUrl
+    EntityId            = "AITab"              # EntityId für den Tab (uniqe ID, free defined)
+    TeamsAppExternalId  = $TeamsAppExternalId   # Manifest-ID deiner Custom App
+    } | ConvertTo-Json -Compress
+
+    # Child-Prozess starten – komplett frische Session, kein PnP
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName  = "pwsh"
+    $psi.Arguments = "-NoProfile -NonInteractive -File `"$tabScript`" --payload `"$payload`""
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError  = $true
+    $psi.UseShellExecute        = $false
+    $p = [System.Diagnostics.Process]::Start($psi)
+    $p.WaitForExit()
+
+    $out = $p.StandardOutput.ReadToEnd()
+    $err = $p.StandardError.ReadToEnd()
+
+    if ($p.ExitCode -ne 0) { throw "Tab-Skript fehlgeschlagen: $err" }
+    Log $out
 
     # --------------------------------------------------------------------
     # Fertig
