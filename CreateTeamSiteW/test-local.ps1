@@ -6,10 +6,14 @@ param(
 # --------------------------------------------------------------------
 # Include Helper Functions
 # --------------------------------------------------------------------
-. (Join-Path $PSScriptRoot 'helpers\SPOAdminFunctions.ps1')
-. (Join-Path $PSScriptRoot 'helpers\SPOLibraryFunctions.ps1')
-. (Join-Path $PSScriptRoot 'helpers\ProvisionPnP.ps1')
-. (Join-Path $PSScriptRoot 'helpers\PSHelpers.ps1')
+$functionRoot = Split-Path -Parent $PSScriptRoot       # …\wwwroot
+$helpersDir   = Join-Path $functionRoot 'helpers'
+
+. (Join-Path $helpersDir 'LoggingFunctions.ps1')
+. (Join-Path $helpersDir 'SPOAdminFunctions.ps1')
+. (Join-Path $helpersDir 'SPOLibraryFunctions.ps1')
+. (Join-Path $helpersDir 'ProvisionPnP.ps1')
+. (Join-Path $helpersDir 'PSHelpers.ps1')
 
 $env:DEBUG = 'true'
 Log "🔧 Test-Skript" $PSScriptRoot "test-local.ps1 startet..."

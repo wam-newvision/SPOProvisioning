@@ -1,0 +1,18 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "Request",
+      "methods": [ "post" ],
+      "route": "TeamsTab"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "Response"
+    }
+  ],
+  "scriptFile": "run.ps1"
+}

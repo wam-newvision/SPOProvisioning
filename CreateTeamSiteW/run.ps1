@@ -2,12 +2,15 @@ param($Request, $TriggerMetadata)
 
 # --------------------------------------------------------------------
 # Include Helper Functions
-# --------------------------------------------------------------------
-. (Join-Path $PSScriptRoot 'helpers\LoggingFunctions.ps1')
-. (Join-Path $PSScriptRoot 'helpers\SPOAdminFunctions.ps1')
-. (Join-Path $PSScriptRoot 'helpers\SPOLibraryFunctions.ps1')
-. (Join-Path $PSScriptRoot 'helpers\ProvisionPnP.ps1')
-. (Join-Path $PSScriptRoot 'helpers\PSHelpers.ps1')
+# -------- Helpers & Core (gemeinsam aus wwwroot\helpers) --------
+$functionRoot = Split-Path -Parent $PSScriptRoot       # …\wwwroot
+$helpersDir   = Join-Path $functionRoot 'helpers'
+
+. (Join-Path $helpersDir 'LoggingFunctions.ps1')
+. (Join-Path $helpersDir 'SPOAdminFunctions.ps1')
+. (Join-Path $helpersDir 'SPOLibraryFunctions.ps1')
+. (Join-Path $helpersDir 'ProvisionPnP.ps1')
+. (Join-Path $helpersDir 'PSHelpers.ps1')
 
 try {
     # --------------------------------------------------------------------
@@ -91,35 +94,42 @@ try {
     Log "🔗 SiteUrl = $siteUrl"
 
     # --------------------------------------------------------------------
-    # Teams Tab anlegen als getrennter Runspace (ohne PnP))
+    # Teams Tab anlegen in getrennter Function
     # --------------------------------------------------------------------
+    #if ($TeamsTabAfterProvisioning) { 
     if (-not $TeamsTabAfterProvisioning) { 
-        Log "Teams Tab in eigenem Prozess anlegen..."
-
-        # Pfad zu deinem Tab-Skript (ohne PnP):
-        $tabScript = Join-Path $PSScriptRoot 'TeamsTab.ps1'
-        Log "Used Tab-Script: $tabScript"
+        Log "---- TeamsTab-Function callen (HTTP) ----"
 
         $ContentUrl = "https://teams.sailing-ninoa.com"
         $TeamsAppExternalId  = "2a357162-7738-459a-b727-8039af89a684"
 
-        # Payload als Datei ablegen, um Quote-Probleme zu vermeiden
-        $payloadJson = @{
-        TeamId             = $teamId
-        TenantId           = $tenantId
-        ChannelName        = ""
-        TabDisplayName     = $TabDisplayName
-        ContentUrl         = $ContentUrl
-        WebsiteUrl         = $ContentUrl
-        EntityId           = "AITab"
-        TeamsAppExternalId = $TeamsAppExternalId
-        } | ConvertTo-Json -Compress
+        $tabPayload = @{
+            TeamId             = $teamId
+            TenantId           = $tenantId
+            ChannelName        = ""
+            TabDisplayName     = $TabDisplayName
+            ContentUrl         = $ContentUrl
+            WebsiteUrl         = $ContentUrl
+            EntityId           = "AITab"
+            TeamsAppExternalId = $TeamsAppExternalId
+        } | ConvertTo-Json -Depth 5 -Compress
 
-        $payloadFile = Join-Path $env:TEMP ("teams-tab-payload-{0}.json" -f ([guid]::NewGuid()))
-        Set-Content -Path $payloadFile -Value $payloadJson -Encoding UTF8 -NoNewline
+        # Funktions-URL & Key aus App Settings (lokal: local.settings.json; Azure: Configuration)
+        $teamsTabUrl = $env:TEAMS_TAB_FUNC_URL
+        $teamsTabKey = $env:TEAMS_TAB_FUNC_KEY
 
-        Log "CallTeamsTab with tabscript $tabScript and payload file: $payloadFile ..."
-        CallTeamsTab -tabScript $tabScript -payloadFile $payloadFile
+        if ([string]::IsNullOrWhiteSpace($teamsTabUrl)) { throw "TEAMS_TAB_FUNC_URL ist nicht gesetzt." }
+
+        # Für authLevel=function den Key anhängen
+        if (-not [string]::IsNullOrWhiteSpace($teamsTabKey)) {
+            if ($teamsTabUrl -notmatch '\?') { $teamsTabUrl += "?code=$teamsTabKey" }
+            else { $teamsTabUrl += "&code=$teamsTabKey" }
+        }
+
+        Log "TeamsTab HTTP aufrufen: $teamsTabUrl"
+        $resp = Invoke-RestMethod -Method POST -Uri $teamsTabUrl -ContentType 'application/json' -Body $tabPayload -TimeoutSec 120
+
+        Log "TeamsTab Response: $($resp | ConvertTo-Json -Compress)"
 
         # --------------------------------------------------------------------
         # gesamte Funktion beenden
@@ -563,35 +573,43 @@ try {
     }
 
     # --------------------------------------------------------------------
-    # Teams Tab anlegen als getrennter Prozess in einer eigenen PS-Session
-    # --- Child-Prozess starten – komplett frische Session, kein PnP ---
+    # Teams Tab anlegen in getrennter Function
     # --------------------------------------------------------------------
-    Log "Teams Tab in eigenem Prozess anlegen..."
+    if ($TeamsTabAfterProvisioning) {
+        Log "---- TeamsTab-Function callen (HTTP) ----"
 
-    # Pfad zu deinem Tab-Skript (ohne PnP):
-    $tabScript = Join-Path $PSScriptRoot 'TeamsTab.ps1'
-    Log "Used Tab-Script: $tabScript"
+        $ContentUrl = "https://teams.sailing-ninoa.com"
+        $TeamsAppExternalId  = "2a357162-7738-459a-b727-8039af89a684"
 
-    $ContentUrl = "https://teams.sailing-ninoa.com"
-    $TeamsAppExternalId  = "2a357162-7738-459a-b727-8039af89a684"
+        $tabPayload = @{
+            TeamId             = $teamId
+            TenantId           = $tenantId
+            ChannelName        = ""
+            TabDisplayName     = $TabDisplayName
+            ContentUrl         = $ContentUrl
+            WebsiteUrl         = $ContentUrl
+            EntityId           = "AITab"
+            TeamsAppExternalId = $TeamsAppExternalId
+        } | ConvertTo-Json -Depth 5 -Compress
 
-    # Payload als Datei ablegen, um Quote-Probleme zu vermeiden
-    $payloadJson = @{
-    TeamId             = $teamId
-    TenantId           = $tenantId
-    ChannelName        = ""
-    TabDisplayName     = $TabDisplayName
-    ContentUrl         = $ContentUrl
-    WebsiteUrl         = $ContentUrl
-    EntityId           = "AITab"
-    TeamsAppExternalId = $TeamsAppExternalId
-    } | ConvertTo-Json -Compress
+        # Funktions-URL & Key aus App Settings (lokal: local.settings.json; Azure: Configuration)
+        $teamsTabUrl = $env:TEAMS_TAB_FUNC_URL
+        $teamsTabKey = $env:TEAMS_TAB_FUNC_KEY
 
-    $payloadFile = Join-Path $env:TEMP ("teams-tab-payload-{0}.json" -f ([guid]::NewGuid()))
-    Set-Content -Path $payloadFile -Value $payloadJson -Encoding UTF8 -NoNewline
+        if ([string]::IsNullOrWhiteSpace($teamsTabUrl)) { throw "TEAMS_TAB_FUNC_URL ist nicht gesetzt." }
 
-    Log "CallTeamsTab with tabscript $tabScript and payload file: $payloadFile ..."
-    CallTeamsTab -tabScript $tabScript -payloadFile $payloadFile
+        # Für authLevel=function den Key anhängen
+        if (-not [string]::IsNullOrWhiteSpace($teamsTabKey)) {
+            if ($teamsTabUrl -notmatch '\?') { $teamsTabUrl += "?code=$teamsTabKey" }
+            else { $teamsTabUrl += "&code=$teamsTabKey" }
+        }
+
+        Log "TeamsTab HTTP aufrufen: $teamsTabUrl"
+        $resp = Invoke-RestMethod -Method POST -Uri $teamsTabUrl -ContentType 'application/json' -Body $tabPayload -TimeoutSec 120
+
+        Log "TeamsTab Response: $($resp | ConvertTo-Json -Compress)"
+        #Log "✅ Teams Tab in '$siteTitle' created successfully."
+    }
 
     # --------------------------------------------------------------------
     # Fertig

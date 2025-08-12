@@ -7,7 +7,11 @@ param(
 # --------------------------------------------------------------------
 # Include Helper Functions
 # --------------------------------------------------------------------
-. (Join-Path $PSScriptRoot 'helpers\PSHelpers.ps1')
+$functionRoot = Split-Path -Parent $PSScriptRoot       # …\wwwroot
+$helpersDir   = Join-Path $functionRoot 'helpers'
+
+. (Join-Path $helpersDir 'PSHelpers.ps1')
+
 
 function Log {
     Write-Host ($args -join " ")
