@@ -42,32 +42,42 @@ Log "🔗 SiteUrl = $siteUrl"
 # --------------------------------------------------------------------
 # Module laden (PnP.PowerShell)
 # --------------------------------------------------------------------
-#$PnPVersion = "1.12.0"
-$PnPVersion = "3.1.0"
+$Graphmodules = $true  # Setze auf $true, um Graph Module zu starten und zeigen
 
-LoadPnPPSModule -PnPVersion $PnPVersion -FktPath $FktPath
+if ($Graphmodules) {
+    # Installiere das Modul, falls nicht geschehen
+    Install-Module Microsoft.Graph -Scope CurrentUser
 
-#Import-Module PnP.PowerShell
-#Get-Module -Name PnP.PowerShell
+    # Authentifiziere dich mit dem benötigten Scope
+    Connect-MgGraph -Scopes "Group.ReadWrite.All"   #Connect-MgGraph -Scopes "TeamsTab.ReadWriteForTeam.All"
 
-# App-Only Login to SharePoint Site
-Log "App-Only Login to SharePoint SITE"
-#Connect-PnP -Tenant $tenantId -SPOUrl $siteUrl
-#Connect-PnP -Tenant $tenantId -SPOUrl $siteUrl -ClientId $ClientId -PfxPath $PfxPath -PfxPassword $PfxPassword
+    # Überprüfe die Verbindung (optional)
+    # Get-MgUser -UserId me
+}
 
-# App-Only Login to SharePoint Admin
-#Connect-PnP -Tenant $tenantId -SPOUrl $adminUrl
-Connect-PnP -Tenant $tenantId -SPOUrl $adminUrl -ClientId $ClientId -PfxPath $PfxPath -PfxPassword $PfxPassword
-
-# --------------------------------------------------------------------
-# PnP Powershell Module anzeigen
-# --------------------------------------------------------------------
-$PnPmodules = $false  # Setze auf $true, um PnP Module zu zeigen
+$PnPmodules = $true  # Setze auf $true, um PnP Module zu starten und zeigen
 
 if ($PnPmodules) {
+    #$PnPVersion = "1.12.0"
+    $PnPVersion = "3.1.0"
+
+    LoadPnPPSModule -PnPVersion $PnPVersion -FktPath $FktPath
+
+    #Import-Module PnP.PowerShell
+    #Get-Module -Name PnP.PowerShell
+
+    # App-Only Login to SharePoint Site
+    Log "App-Only Login to SharePoint SITE"
+    #Connect-PnP -Tenant $tenantId -SPOUrl $siteUrl
+    #Connect-PnP -Tenant $tenantId -SPOUrl $siteUrl -ClientId $ClientId -PfxPath $PfxPath -PfxPassword $PfxPassword
+
     # App-Only Login to SharePoint Admin
+    #Connect-PnP -Tenant $tenantId -SPOUrl $adminUrl
     Connect-PnP -Tenant $tenantId -SPOUrl $adminUrl -ClientId $ClientId -PfxPath $PfxPath -PfxPassword $PfxPassword
 
+    # --------------------------------------------------------------------
+    # PnP Powershell Module anzeigen
+    # --------------------------------------------------------------------
     Get-Module PnP.PowerShell | Format-List Name, Version, ModuleBase
     #(Get-Command Set-PnPList).Parameters.Keys
 }
@@ -247,12 +257,26 @@ if ($TeamsTab) {
     # Tab hinzufügen
     Log "WebSite Tab hinzufügen zu Team: '$($team.DisplayName)' ..."
 
+<#
     AddTeamsTab `
         -team $team `
         -TeamsChannel $channel `
         -TabDisplayName $TabDisplayName `
         -WebSiteUrl $TeamsTabURL `
         -TabType WebSite
+#>
+
+    $TeamsAppId = "2a357162-7738-459a-b727-8039af89a684"  # App-ID der zugehörigen Teams-App (z.B. Copilot Studio Bot)
+    $TeamsTabURL = "https://teams.sailing-ninoa.com"
+
+    Add-GraphTeamsTab `
+        -TeamId $Team.GroupId `
+        -ChannelId $Channel.Id `
+        -TabDisplayName $TabDisplayName `
+        -TeamsAppId $TeamsAppId `  # App-ID der zugehörigen Teams-App
+        -EntityId "teaminfotab" `  # i. d. R. „copilot“ für Copilot Studio Bots
+        -ContentUrl $TeamsTabURL `  # Content URL wie im App-Manifest
+        -WebsiteUrl $TeamsTabURL  # Optional: zusätzlicher Website-Link 
 
 }
 

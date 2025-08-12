@@ -296,7 +296,7 @@ if ($PnP) {
     # Test URL:
     $contentUrl = "https://mwpnewvision.sharepoint.com/sites/1578/Shared Documents/Forms/AllItems.aspx"
 
-    AddTeamsTab `
+    Add-TeamsTabPnP `
         -team $team `
         -TeamsChannel $channel `
         -TabDisplayName $TabDisplayName `

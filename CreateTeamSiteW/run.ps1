@@ -228,54 +228,6 @@ try {
 
     Log "Standard Library: '$libName' erstellt und verfügbar"
     
-    # ----------------------------------------------------------------
-    # Default Channel im Team finden
-    # ----------------------------------------------------------------
-    Log "Find Default Channel for Team '$alias' ..."
-    $channels = $null
-    $maxTries = 20
-    $waitSeconds = 3
-
-    Log "📢 Suche nach Channels im Team '$alias', ID: '$($team.GroupId)' ..."
-
-    for ($i=1; $i -le $maxTries; $i++) {
-        try {
-            $channels = Get-PnPTeamsChannel -Team $team.GroupId -ErrorAction Stop
-            if ($channels -and $channels.Count -gt 0) {
-                Log "✅ Es wurden $($channels.Count) Kanäle gefunden (nach $i Versuch(en))"
-                break
-            }
-        } catch {
-            Log "⌛ Warte auf Channel-Verfügbarkeit (Versuch $i)..."
-            Start-Sleep -Seconds $waitSeconds
-        }
-    }
-
-    if (-not $channels -or $channels.Count -eq 0) {
-        throw "❌ Es konnten keine Channels für das Team '$alias' gefunden werden!"
-    }
-
-    if($channels) {
-        $channel  = $channels | Select-Object -First 1
-        Log "📢 Default Channel: '$($channel.DisplayName)' (ID: '$($channel.Id)')"
-
-        # ----------------------------------------------------------------
-        # Teams Tab im Default Channel anlegen (zB AI Agent oder Websuche oder Sharepoint Site)
-        # ----------------------------------------------------------------
-        Log "Add Teams-Tab to Team '$alias' in Channel '$($channel.DisplayName)' ..."
-
-        AddTeamsTab `
-            -team $team `
-            -TeamsChannel $channel `
-            -TabDisplayName $TabDisplayName `
-            -WebSiteUrl $TeamsTabURL `
-            -TabType WebSite
-
-            #-Type SharePointPageAndList `
-            #-WebSiteUrl "https://tenant.sharepoint.com/sites/site/Lists/list/AllItems.aspx"
-
-    }
-
     # ==============================================================
     # Ab hier: SITE Provisioning - App-Only Login to SharePoint SITE
     # ==============================================================
