@@ -3,16 +3,43 @@ param(
     $TriggerMetadata
 )
 
-# -------- HTTP Payload lesen --------
-# Erwartet: JSON-Body mit Feldern wie TeamId, TenantId, ChannelName, ...
+# -------- HTTP Payload lesen (robust) --------
 try {
-    $bodyText = $Request.Body
-    if (-not $bodyText) { throw "Leerer Request-Body." }
-    $cfg = $bodyText | ConvertFrom-Json
+    $raw = $Request.Body
+
+    if ($null -eq $raw) { throw "Leerer Request-Body." }
+
+    switch ($raw.GetType().FullName) {
+        'System.String' {
+            if ([string]::IsNullOrWhiteSpace($raw)) { throw "Leerer Request-Body." }
+            $cfg = $raw | ConvertFrom-Json -ErrorAction Stop
+        }
+        'System.Byte[]' {
+            $text = [System.Text.Encoding]::UTF8.GetString($raw)
+            if ([string]::IsNullOrWhiteSpace($text)) { throw "Leerer Request-Body." }
+            $cfg = $text | ConvertFrom-Json -ErrorAction Stop
+        }
+        'System.IO.MemoryStream' {
+            $reader = New-Object System.IO.StreamReader($raw, [System.Text.Encoding]::UTF8)
+            $text = $reader.ReadToEnd()
+            if ([string]::IsNullOrWhiteSpace($text)) { throw "Leerer Request-Body." }
+            $cfg = $text | ConvertFrom-Json -ErrorAction Stop
+        }
+        default {
+            # Falls das Runtime den Body bereits zu PSCustomObject deserialisiert hat
+            if ($raw -is [pscustomobject]) {
+                $cfg = $raw
+            } else {
+                # Letzter Versuch: stringify und parsen
+                $text = $raw | ConvertTo-Json -Depth 50
+                $cfg  = $text | ConvertFrom-Json -ErrorAction Stop
+            }
+        }
+    }
 }
 catch {
     $msg = "Ungültiger JSON-Body: $($_.Exception.Message)"
-    Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{ StatusCode = 400; Body = $msg })
+    Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{ StatusCode = 400; Body = $msg; Headers = @{ "Content-Type" = "text/plain" } })
     return
 }
 
