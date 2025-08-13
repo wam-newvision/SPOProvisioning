@@ -126,8 +126,11 @@ try {
     $channelId = $chan[0]
     $channelNameResolved = $chan[1]
 
-    $catalogAppId = Get-CatalogAppId -ExternalId $TeamsAppExternalId
-    Log "ℹ️ Custom-App (externalId=$TeamsAppExternalId) im App-Katalog gefunden. Catalog-ID: '$catalogAppId'"
+    $catalogApp = Get-CatalogAppId -ExternalId $TeamsAppExternalId
+    $catalogAppId = $catalogApp.id
+    $catalogAppName = $catalogApp.displayName
+
+    Log "ℹ️ Custom-App $catalogAppName im App-Katalog gefunden."
 
     $channelInfo = Invoke-MgGraphRequest -Method GET -Uri "https://graph.microsoft.com/v1.0/teams/$resolvedTeamId/channels/$channelId"
 
@@ -147,7 +150,7 @@ try {
         default { throw "Unbekannter membershipType: $($channelInfo.membershipType)" }
     }
 
-    Log "Wait-TeamsAppReady -TeamId $resolvedTeamId -CatalogAppId $catalogAppId -TimeoutSeconds 20 ..."
+    Log "Wait-TeamsAppReady -TeamId $resolvedTeamId ..."
     Wait-TeamsAppReady -TeamId $resolvedTeamId -CatalogAppId $catalogAppId -TimeoutSeconds 20
 
     $tabParams = @{
@@ -162,7 +165,7 @@ try {
     Log "Add-GraphTeamsTab ..."
     Add-GraphTeamsTab @tabParams
 
-    Log "Wait-TeamsTabVisible -TeamId $resolvedTeamId -ChannelId $channelId -TabDisplayName $TabDisplayName -TimeoutSeconds 45 -IntervalSeconds 3"
+    Log "Wait-TeamsTabVisible -TeamId $resolvedTeamId ..."
     Wait-TeamsTabVisible -TeamId $resolvedTeamId -ChannelId $channelId -TabDisplayName $TabDisplayName -TimeoutSeconds 45 -IntervalSeconds 3
 
     Log "✅ Tab '$TabDisplayName' im Channel '$channelNameResolved' erstellt."

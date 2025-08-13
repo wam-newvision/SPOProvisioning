@@ -79,13 +79,13 @@ function Get-ChannelId {
 
     $exact = $res.value | Where-Object { $_.displayName -ieq $ChannelName } | Select-Object -First 1
     if ($exact) { 
-        if (Get-Command Log -ErrorAction SilentlyContinue) { Log "[Get-ChannelId] ℹ️ Verwende Kanal: $($exact.displayName) (ID: $($exact.id))" }
+        if (Get-Command Log -ErrorAction SilentlyContinue) { Log "ℹ️ Verwende Kanal: $($exact.displayName) (ID: $($exact.id))" }
         return @($exact.id, $exact.displayName) 
     }
 
     $start = $res.value | Where-Object { $_.displayName -like "$ChannelName*" } | Select-Object -First 1
     if ($start) { 
-        if (Get-Command Log -ErrorAction SilentlyContinue) { Log "[Get-ChannelId] ℹ️ Verwende Kanal (startsWith): $($start.displayName) (ID: $($start.id))" }
+        if (Get-Command Log -ErrorAction SilentlyContinue) { Log "ℹ️ Verwende Kanal (startsWith): $($start.displayName) (ID: $($start.id))" }
         return @($start.id, $start.displayName) 
     }
 

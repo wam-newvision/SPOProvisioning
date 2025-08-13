@@ -73,8 +73,10 @@ try {
     $channelNameResolved = $chan[1]
 
     # App-Katalog: externalId -> Katalog-ID (teamsAppId)
-    $catalogAppId = Get-CatalogAppId -ExternalId $TeamsAppExternalId
-    Log "ℹ️ Custom-App (externalId=$TeamsAppExternalId) im App-Katalog gefunden. Catalog-ID: '$catalogAppId'"
+    $catalogApp = Get-CatalogAppId -ExternalId $TeamsAppExternalId
+    $catalogAppId = $catalogApp.id
+    $catalogAppName = $catalogApp.displayName
+    Log "ℹ️ Custom-App $catalogAppName im App-Katalog gefunden"
 
     # Channel-Infos holen (MembershipType für Installationsziel)
     $channelInfo = Invoke-MgGraphRequest -Method GET -Uri "https://graph.microsoft.com/v1.0/teams/$resolvedTeamId/channels/$channelId"

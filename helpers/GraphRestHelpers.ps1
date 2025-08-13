@@ -157,7 +157,7 @@ function Invoke-Graph {
     catch {
         # Exception-Message
         if (Get-Command Log -ErrorAction SilentlyContinue) {
-            Log ("❌ Graph-Request-Fehler: {0} {1} -> {2}" -f $Method, $Uri, $_.Exception.Message)
+            Log ("Graph-Request-Warning: {0} {1} -> {2}" -f $Method, $Uri, $_.Exception.Message)
         }
 
         # Response-Body auslesen (JSON von Graph)
@@ -198,7 +198,7 @@ function Get-CatalogAppId {
     $uri = "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps?`$filter=externalId eq '$ExternalId'&`$select=id,externalId,displayName"
     $res = Invoke-Graph -Method GET -Uri $uri
     if (-not $res.value -or $res.value.Count -eq 0) { throw "App mit ExternalId '$ExternalId' nicht gefunden." }
-    return $res.value[0].id
+    return $res.value[0]
 }
 
 function Get-AllPages {
@@ -242,7 +242,7 @@ function Get-TeamsAppInstalled {
     )
 
     if (-not $CatalogAppId) { throw "❌ CatalogAppId wurde nicht übergeben!" }
-    if (Get-Command Log -ErrorAction SilentlyContinue) { Log "[Get-TeamsAppInstalled] Ensure app $CatalogAppId on team $ResolvedTeamId" }
+    if (Get-Command Log -ErrorAction SilentlyContinue) { Log "Ensure app $CatalogAppId on team $ResolvedTeamId" }
 
     # Katalog-Eintrag prüfen (korrekte URL MIT ID im Pfad) – nicht fatal
     try {
@@ -270,7 +270,7 @@ function Get-TeamsAppInstalled {
             } else { throw }
         }
     } else {
-        if (Get-Command Log -ErrorAction SilentlyContinue) { Log "ℹ️ App already installed at team scope (installedAppId=$($existing[0].id))" }
+        if (Get-Command Log -ErrorAction SilentlyContinue) { Log "ℹ️ App already installed at team scope" }
     }
 
     $end = (Get-Date).AddSeconds($TimeoutSeconds)
@@ -301,7 +301,7 @@ function Get-TeamsAppInstalledForChannel {
     )
 
     if (-not $CatalogAppId) { throw "❌ CatalogAppId wurde nicht übergeben!" }
-    if (Get-Command Log -ErrorAction SilentlyContinue) { Log "[Get-TeamsAppInstalledForChannel] Ensure app $CatalogAppId on channel $ChannelId (team $ResolvedTeamId)" }
+    if (Get-Command Log -ErrorAction SilentlyContinue) { Log "Ensure app $CatalogAppId on channel $ChannelId (team $ResolvedTeamId)" }
 
     # Katalog-Eintrag prüfen – nicht fatal
     try {
@@ -352,7 +352,7 @@ function Wait-TeamsAppReady {
         [int]$IntervalSeconds = 2
     )
 
-    if (Get-Command Log -ErrorAction SilentlyContinue) { Log "[Wait-TeamsAppReady] [Wait] App ready on team $TeamId (app=$CatalogAppId)" }
+    if (Get-Command Log -ErrorAction SilentlyContinue) { Log "App ready on team: $Team" }
 
     $listUri = "https://graph.microsoft.com/v1.0/teams/$TeamId/installedApps?`$expand=teamsAppDefinition(`$select=id,teamsAppId)"
     $end = (Get-Date).AddSeconds($TimeoutSeconds)
@@ -380,7 +380,7 @@ function Add-GraphTeamsTab {
     )
 
     if (Get-Command Log -ErrorAction SilentlyContinue) {
-        Log "📌 [Add-GraphTeamsTab] '$TabDisplayName' -> Team '$TeamId' / Channel '$ChannelId'"
+        Log "📌 '$TabDisplayName' -> Team '$TeamId'"
     }
 
     # 0) Idempotenz: existiert ein Tab mit gleichem displayName bereits?
