@@ -586,7 +586,8 @@ try {
     # --------------------------------------------------------------------
     # Teams Tab anlegen in getrennter Function
     # --------------------------------------------------------------------
-    if ($TeamsTabAfterProvisioning) {
+    #if ($TeamsTabAfterProvisioning) { 
+    if ($TeamsTabAfterProvisioning) { 
         Log "---- TeamsTab-Function callen (HTTP) ----"
 
         $ContentUrl = "https://teams.sailing-ninoa.com"
@@ -616,10 +617,23 @@ try {
         }
 
         Log "TeamsTab HTTP aufrufen: $teamsTabUrl"
-        $resp = Invoke-RestMethod -Method POST -Uri $teamsTabUrl -ContentType 'application/json' -Body $tabPayload -TimeoutSec 120
-
-        Log "TeamsTab Response: $($resp | ConvertTo-Json -Compress)"
-        #Log "✅ Teams Tab in '$siteTitle' created successfully."
+        try {
+            $resp = Invoke-RestMethod -Method POST -Uri $teamsTabUrl `
+                -ContentType 'application/json; charset=utf-8' `
+                -Body $tabPayload -TimeoutSec 120
+            Log "TeamsTab Response: $($resp | ConvertTo-Json -Compress)"
+        }
+        catch {
+            $e = $_.Exception
+            $msg = $e.Message
+            try {
+                $respStream = $e.Response.GetResponseStream()
+                $reader = New-Object System.IO.StreamReader($respStream)
+                $bodyText = $reader.ReadToEnd()
+                if ($bodyText) { $msg = "$msg`n$bodyText" }
+            } catch {}
+            throw "Aufruf TeamsTab fehlgeschlagen: $msg"
+        }
     }
 
     # --------------------------------------------------------------------

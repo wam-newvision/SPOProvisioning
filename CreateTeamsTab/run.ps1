@@ -3,7 +3,11 @@ param(
     $TriggerMetadata
 )
 
+$VerbosePreference  = 'SilentlyContinue'
+$ProgressPreference = 'SilentlyContinue'
+
 $script:ResponseAlreadySet = $false
+
 function Send-HttpResponse([int]$StatusCode, $Body) {
     if ($script:ResponseAlreadySet) { return }
     $script:ResponseAlreadySet = $true
