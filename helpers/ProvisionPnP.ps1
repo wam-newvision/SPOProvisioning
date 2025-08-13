@@ -2,7 +2,7 @@
 # Include Helper Functions
 # --------------------------------------------------------------------
 . (Join-Path $PSScriptRoot 'LoggingFunctions.ps1')
-. (Join-Path $PSScriptRoot 'SPOAdminFunctions.ps1')
+. (Join-Path $PSScriptRoot 'AdminFunctions.ps1')
 
 # --------------------------------------------------------------------
 function Enable-SiteCollectionFeatures {

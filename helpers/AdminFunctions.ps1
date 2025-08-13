@@ -62,7 +62,7 @@ function LoadGraphModule {
         throw "❌ Modulmanifest nicht gefunden: $psd1  (erwartet unter '$FktPath\$ModuleName\$GraphVersion\')"
     }
 
-    Import-Module $psd1 -Force -ErrorAction Stop
+    Import-Module $psd1 -Force -Global -ErrorAction Stop
     Log "✅ Modul '$ModuleName' geladen aus $($psd1 | Split-Path -Parent)"
 }
 # --------------------------------------------------------------------
@@ -82,22 +82,37 @@ function Connect-MSGraph {
         throw "❌ Zertifikat nicht gefunden unter $PfxPath"
     }
 
-    # --------------------------
-    # Microsoft Graph Login
-    # --------------------------
-    Log "🔐 Verbinde zu Microsoft Graph im Tenant $TenantId ..."
-    $cert = Get-PfxCertificate -FilePath $PfxPath
+    # PFX inkl. Private Key laden (Azure Functions-tauglich)
+    $flags = [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::EphemeralKeySet `
+           -bor [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable `
+           -bor [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::MachineKeySet
+
+    $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($PfxPath, $PfxPassword, $flags)
+    if (-not $cert.HasPrivateKey) { throw "❌ PFX wurde ohne Private Key geladen." }
+
+    try { Disconnect-MgGraph -ErrorAction SilentlyContinue } catch {}
+
     Connect-MgGraph -ClientId $ClientId `
                     -TenantId $TenantId `
-                    -Certificate $cert `
+                    -ClientCertificate $cert `
                     -NoWelcome
+
+    # Profil setzen & Warmup-Call (stabilisiert Auth-Context im selben Runspace)
+    Select-MgProfile -Name 'v1.0'
+
+    # harmloser App-Only-Testcall (erzwingt Token/Provider-Init)
+    $null = Invoke-MgGraphRequest -Method GET -Uri 'https://graph.microsoft.com/v1.0/organization'
+
     $ctx = Get-MgContext
-    if (-not $ctx -or $ctx.TenantId -ne $TenantId) {
-        throw "❌ Graph-Login fehlgeschlagen oder falscher Tenant (aktueller: $($ctx.TenantId))"
+    Log "AuthType=$($ctx.AuthType), TenantId=$($ctx.TenantId)"
+    if (-not $ctx -or $ctx.AuthType -ne 'ClientCredential' -or $ctx.TenantId -ne $TenantId) {
+        throw "❌ Graph-Login fehlgeschlagen (AuthType=$($ctx.AuthType), Tenant=$($ctx.TenantId))"
     }
+
     Log "✅ Graph verbunden."
 }
 # --------------------------------------------------------------------
+
 function Connect-PnP {
     param(
         [Parameter(Mandatory=$true)][string]$TenantId,   # Kunden-Tenant ID oder Domain
