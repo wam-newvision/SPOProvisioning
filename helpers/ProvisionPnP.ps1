@@ -5,48 +5,6 @@
 . (Join-Path $PSScriptRoot 'SPOAdminFunctions.ps1')
 
 # --------------------------------------------------------------------
-# Module laden (PnP.PowerShell)
-# --------------------------------------------------------------------
-function LoadPnPPSModule {
-    param (
-        [string]$PnPVersion,  # $PnPVersion = "3.1.0"
-        [string]$FktPath  # $FktPath = "C:\Functions\dms-provisioning\CreateTeamSiteW"
-    )
-        
-    #if (-not $PnPVersion) {$PnPVersion = "3.1.0"} #$PnPVersion = "1.12.0"
-    #if (-not $FktPath) {$FktPath = "C:\Functions\dms-provisioning\CreateTeamSiteW"} 
-
-    $modBase = Join-Path $FktPath 'modules'
-    $sep = [IO.Path]::PathSeparator
-    $env:PSModulePath = "${modBase}${sep}$env:PSModulePath"
-    
-    $PnPPath = Join-Path $modBase "PnP.PowerShell\$PnPVersion\PnP.PowerShell.psd1"
-
-    Log "📦 Import PnP.PowerShell from local module: $PnPVersion"
-    Log "📦 Path: $PnPPath"
-    
-    Import-Module $PnPPath -DisableNameChecking -Global -ErrorAction Stop
-
-#    if ($local) {
-#       Log "📦 Import PnP.PowerShell from local module..."
-#        Import-Module (Join-Path $FktPath 'modules\PnP.PowerShell\3.1.0\PnP.PowerShell.psd1') -DisableNameChecking -Global -ErrorAction Stop
-#    } else {
-#        Log "📦 Import PnP.PowerShell from requirements.psd1..."
-#        Import-Module "PnP.PowerShell" -DisableNameChecking -Global -ErrorAction Stop
-#        #Import-Module (Join-Path $FktPath 'requirements.psd1') -DisableNameChecking -Global
-#    }
-
-    Log "📦 PowerShell Version:"
-    $PSVersionTable.PSVersion
-    Log "📦 PnP.PowerShell Versionen verfügbar:"
-    Get-Module -Name PnP.PowerShell -ListAvailable | Select-Object Version, ModuleBase
-    Log "📦 PnP.PowerShell Version verwendet:"
-    Get-Module -Name PnP.PowerShell | Select-Object Version, ModuleBase
-    Log "📦 PnP.PowerShell import done"
-
-}
-# --------------------------------------------------------------------
-
 function Enable-SiteCollectionFeatures {
     param(
         [string]$featureId,  # Feature ID, z.B. "b50e3104-6812-424f-a011-cc90e6327318"

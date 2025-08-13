@@ -1,37 +1,32 @@
 param($Request, $TriggerMetadata)
 
-# --------------------------------------------------------------------
-# Include Helper Functions
-# -------- Helpers & Core (gemeinsam aus wwwroot\helpers) --------
+# -------- Helpers & Core (gemeinsam aus wwwroot\Helpers) --------
 $functionRoot = Split-Path -Parent $PSScriptRoot       # …\wwwroot
-$helpersDir   = Join-Path $functionRoot 'helpers'
+$helpersDir   = Join-Path $functionRoot 'Helpers'
 
 . (Join-Path $helpersDir 'LoggingFunctions.ps1')
-. (Join-Path $helpersDir 'SPOAdminFunctions.ps1')
+. (Join-Path $helpersDir 'AdminFunctions.ps1')
 . (Join-Path $helpersDir 'SPOLibraryFunctions.ps1')
 . (Join-Path $helpersDir 'ProvisionPnP.ps1')
 . (Join-Path $helpersDir 'PSHelpers.ps1')
 
+# ------------- Framework-Helpers ----------------------------
+$InformationPreference = 'Continue'
+$CurDir                = Get-Location
+$certsDir              = Join-Path $functionRoot 'Certs'
+Get-ChildItem -Path $certsDir
+$modulesDir            = Join-Path $functionRoot 'Modules'
+Log "---------------------- Start Logging ---------------------"
+Log "PowerShell Version: $($PSVersionTable.PSVersion)"
+Log "Current Directory : $CurDir"
+Log "FunctionRoot      : $functionRoot"
+Log "PSScriptRoot      : $PSScriptRoot"
+Log "CertLocation      : $certsDir"
+Log "ModulesLocation   : $modulesDir"
+Log "----------------------------------------------------------"
+
 try {
-    # --------------------------------------------------------------------
-    # 0) Framework-Helpers
-    # --------------------------------------------------------------------
-    $InformationPreference = 'Continue'
-    Log "-------- Start Logging --------"
-    Log "Current PowerShell Version: $($PSVersionTable.PSVersion)"
-    $CurDir = Get-Location
-    Log "Current Directory: $CurDir"
-    Log "PSScriptRoot: $PSScriptRoot"
-    
-    $CertLocation = Join-Path $PSScriptRoot 'certs'
-    Log "CertLocation: $CertLocation"
-    Get-ChildItem -Path $CertLocation
-    Log "-------------------------------"
-
-    # --------------------------------------------------------------------
-    # 1) Eingaben prüfen
-    # --------------------------------------------------------------------
-
+    # --------------- Eingaben prüfen ------------------------------
     # Pflichtfelder
     $requiredParams = @(
         "tenantId", # e.g. "contoso.onmicrosoft.com"
@@ -64,15 +59,17 @@ try {
     # Definierte xxx...Params Felder auf Vorhandensein prüfen und auswerten
     $params = EvaluateRequestParameters -Request $Request -RequiredParams $requiredParams -BooleanParams $booleanParams -OptionalParams $optionalParams
 
-    # Setze alle Variablen für die Pflicht-, booleschen und optionalen Parameter
+    # Setze alle Variablen für die Pflicht-Parameter
     foreach ($param in $requiredParams) {
         Set-Variable -Name $param -Value $params[$param]
     }
 
+    # Setze alle Variablen für die booleschen Parameter
     foreach ($param in $booleanParams) {
         Set-Variable -Name $param -Value $params[$param]
     }
 
+    # Setze alle Variablen für die optionalen Parameter
     foreach ($param in $optionalParams) {
         $paramName = $param.Name
         Set-Variable -Name $paramName -Value $params[$paramName]
@@ -127,9 +124,23 @@ try {
         }
 
         Log "TeamsTab HTTP aufrufen: $teamsTabUrl"
-        $resp = Invoke-RestMethod -Method POST -Uri $teamsTabUrl -ContentType 'application/json' -Body $tabPayload -TimeoutSec 120
-
-        Log "TeamsTab Response: $($resp | ConvertTo-Json -Compress)"
+        try {
+            $resp = Invoke-RestMethod -Method POST -Uri $teamsTabUrl `
+                -ContentType 'application/json; charset=utf-8' `
+                -Body $tabPayload -TimeoutSec 120
+            Log "TeamsTab Response: $($resp | ConvertTo-Json -Compress)"
+        }
+        catch {
+            $e = $_.Exception
+            $msg = $e.Message
+            try {
+                $respStream = $e.Response.GetResponseStream()
+                $reader = New-Object System.IO.StreamReader($respStream)
+                $bodyText = $reader.ReadToEnd()
+                if ($bodyText) { $msg = "$msg`n$bodyText" }
+            } catch {}
+            throw "Aufruf TeamsTab fehlgeschlagen: $msg"
+        }
 
         # --------------------------------------------------------------------
         # gesamte Funktion beenden
@@ -147,8 +158,8 @@ try {
     #$PnPVersion = "1.12.0"
     $PnPVersion = "3.1.0"
 
-    Log "LoadPnPPSModule -PnPVersion $PnPVersion -FktPath $PSScriptRoot"
-    LoadPnPPSModule -PnPVersion $PnPVersion -FktPath $PSScriptRoot
+    Log "LoadPnPPSModule -PnPVersion $PnPVersion -FktPath $modulesDir"
+    LoadPnPPSModule -PnPVersion $PnPVersion -FktPath $modulesDir
 
     # ---------------------------------------------------------------
     Log "App-Only Login to SharePoint ADMIN"

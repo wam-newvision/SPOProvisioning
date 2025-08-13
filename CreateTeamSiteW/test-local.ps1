@@ -17,11 +17,26 @@ $helpersDir   = Join-Path $functionRoot 'helpers'
 
 $env:DEBUG = 'true'
 Log "🔧 Test-Skript" $PSScriptRoot "test-local.ps1 startet..."
+
+# ------------- Framework-Helpers ----------------------------
+$InformationPreference = 'Continue'
+$CurDir                = Get-Location
+$certsDir              = Join-Path $functionRoot 'Certs'
+Get-ChildItem -Path $certsDir
+$modulesDir            = Join-Path $functionRoot 'Modules'
+Log "---------------------- Start Logging ---------------------"
+Log "PowerShell Version: $($PSVersionTable.PSVersion)"
+Log "Current Directory : $CurDir"
+Log "FunctionRoot      : $functionRoot"
+Log "PSScriptRoot      : $PSScriptRoot"
+Log "CertLocation      : $certsDir"
+Log "ModulesLocation   : $modulesDir"
+Log "----------------------------------------------------------"
+
 # --------------------------------------------------------------------
 # Eingaben zuweisen
 # --------------------------------------------------------------------
-#$FktPath      = "C:\Functions\dms-provisioning\CreateTeamSiteW"
-$FktPath      = $PSScriptRoot
+$FktPath      = $PSScriptRoot          # "C:\Functions\dms-provisioning\CreateTeamSiteW"
 
 $ClientId     = "5a19516e-dc54-4d2f-aebc-f1b679a69457"
 #$clientSecret = $env:AZURE_CLIENT_SECRET
@@ -30,7 +45,7 @@ $tenantId     = "mwpnewvision.onmicrosoft.com"
 $siteTitle    = $Site
 #$hubName      = "ProjektHub"
 
-$PfxPath      = Join-Path $FktPath 'certs\mwpnewvision.pfx'
+$PfxPath      = Join-Path $certsDir 'mwpnewvision.pfx'
 $PfxPwd       = "MyP@ssword!" # Setze hier dein PFX-Passwort
 $PfxPassword  = (ConvertTo-SecureString $PfxPwd -AsPlainText -Force)
 
@@ -65,7 +80,7 @@ if ($PnPmodules) {
     #$PnPVersion = "1.12.0"
     $PnPVersion = "3.1.0"
 
-    LoadPnPPSModule -PnPVersion $PnPVersion -FktPath $FktPath
+    LoadPnPPSModule -PnPVersion $PnPVersion -FktPath $modulesDir
 
     #Import-Module PnP.PowerShell
     #Get-Module -Name PnP.PowerShell

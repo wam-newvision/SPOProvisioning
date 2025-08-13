@@ -135,24 +135,3 @@ function Test-Schema {
     }
 }
 # --------------------------------------------------------------------
-function LoadGraphModule {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)][string]$ModuleName,     # z.B. 'Microsoft.Graph.Teams'
-        [Parameter(Mandatory)][string]$FktPath,        # Pfad auf den 'modules'-Ordner
-        [Parameter(Mandatory)][string]$GraphVersion    # z.B. '2.29.1'
-    )
-
-    $ErrorActionPreference = 'Stop'
-
-    # Erwartete Struktur: <FktPath>\<ModuleName>\<GraphVersion>\<ModuleName>.psd1
-    $psd1 = Join-Path $FktPath (Join-Path $ModuleName (Join-Path $GraphVersion "$ModuleName.psd1"))
-
-    if (-not (Test-Path $psd1)) {
-        throw "❌ Modulmanifest nicht gefunden: $psd1  (erwartet unter '$FktPath\$ModuleName\$GraphVersion\')"
-    }
-
-    Import-Module $psd1 -Force -ErrorAction Stop
-    Log "✅ Modul '$ModuleName' geladen aus $($psd1 | Split-Path -Parent)"
-}
-# --------------------------------------------------------------------

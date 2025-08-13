@@ -3,6 +3,27 @@ param(
     $TriggerMetadata
 )
 
+trap {
+    $e = $_.Exception
+    $body = @{
+        ok = $false
+        error = @{
+            message = $e.Message
+            type    = $e.GetType().FullName
+            inner   = $e.InnerException?.Message
+            script  = $($_.InvocationInfo?.ScriptName)
+            line    = $($_.InvocationInfo?.ScriptLineNumber)
+        }
+    } | ConvertTo-Json -Depth 5 -Compress
+
+    Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
+        StatusCode = 500
+        Body       = $body
+        Headers    = @{ "Content-Type" = "application/json" }
+    })
+    continue
+}
+
 # -------- HTTP Payload lesen (robust) --------
 try {
     $raw = $Request.Body
@@ -38,9 +59,24 @@ try {
     }
 }
 catch {
-    $msg = "Ungültiger JSON-Body: $($_.Exception.Message)"
-    Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{ StatusCode = 400; Body = $msg; Headers = @{ "Content-Type" = "text/plain" } })
-    return
+    $e = $_.Exception
+    $body = @{
+        ok = $false
+        error = @{
+            message = $e.Message
+            type    = $e.GetType().FullName
+            inner   = $e.InnerException?.Message
+            script  = $($_.InvocationInfo?.ScriptName)
+            line    = $($_.InvocationInfo?.ScriptLineNumber)
+        }
+    } | ConvertTo-Json -Depth 5 -Compress
+
+    Log "❌ Fehler: $($e.Message)"
+    Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
+        StatusCode = 500
+        Body       = $body
+        Headers    = @{ "Content-Type" = "application/json" }
+    })
 }
 
 # -------- Variablen befüllen (Defaults ident zu deiner Vorlage) --------
@@ -58,15 +94,30 @@ $PSModuleAutoloadingPreference = 'None'  # wir laden gezielt aus wwwroot\Modules
 
 # -------- Helpers & Core (gemeinsam aus wwwroot\helpers) --------
 $functionRoot = Split-Path -Parent $PSScriptRoot       # …\wwwroot
-$helpersDir   = Join-Path $functionRoot 'helpers'
+$helpersDir   = Join-Path $functionRoot 'Helpers'
 
 . (Join-Path $helpersDir 'LoggingFunctions.ps1')
+. (Join-Path $helpersDir 'AdminFunctions.ps1')   # enthält LoadGraphModule
 . (Join-Path $helpersDir 'TeamsTab.Core.ps1')
-. (Join-Path $helpersDir 'PSHelpers.ps1')   # enthält LoadGraphModule
+
+# ------------- Framework-Helpers ----------------------------
+$InformationPreference = 'Continue'
+$CurDir                = Get-Location
+$certsDir              = Join-Path $functionRoot 'Certs'
+Get-ChildItem -Path $certsDir
+$modulesDir            = Join-Path $functionRoot 'Modules'
+Log "---------------------- Start Logging ---------------------"
+Log "PowerShell Version: $($PSVersionTable.PSVersion)"
+Log "Current Directory : $CurDir"
+Log "FunctionRoot      : $functionRoot"
+Log "PSScriptRoot      : $PSScriptRoot"
+Log "CertLocation      : $certsDir"
+Log "ModulesLocation   : $modulesDir"
+Log "----------------------------------------------------------"
 
 # -------- Graph-Module aus \modules laden (PnP-frei) --------
-$modulesDir = Join-Path $PSScriptRoot 'modules'
 $GraphVersion = "2.29.1"
+Log "ℹ️ Loading Modules from Graph-Version: $GraphVersion ..."
 
 foreach ($m in @('Microsoft.Graph.Authentication','Microsoft.Graph.Teams','Microsoft.Graph.Groups')) {
     Log "LoadGraphModule -ModuleName $m -FktPath $modulesDir -GraphVersion $GraphVersion"
@@ -74,11 +125,17 @@ foreach ($m in @('Microsoft.Graph.Authentication','Microsoft.Graph.Teams','Micro
 }
 
 # -------- Graph-Login --------
+Log "ℹ️ Graph-Login: Tenant: '$TenantId' - ClientId: '$env:ClientId'"
+Connect-MSGraph -ClientId $env:ClientId -TenantId $TenantId
+<#
+#Connect-MgGraph -TenantId $TenantId 
+# Aufruf als User 
 Connect-MgGraph -Scopes `
     "TeamsAppInstallation.ReadWriteForTeam", `
     "TeamsTab.ReadWriteForTeam", `
     "Group.Read.All", `
     "AppCatalog.Read.All"
+#>
 
 try {
     Log "ℹ️ TeamId Eingabe: '$TeamId'"
