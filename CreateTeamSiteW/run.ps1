@@ -27,11 +27,13 @@ Log "----------------------------------------------------------"
 
 try {
     # --------------- Eingaben prüfen ------------------------------
+Log "Eingaben prüfen und Variablen initialisieren..."
     # Pflichtfelder
     $requiredParams = @(
         "tenantId", # e.g. "contoso.onmicrosoft.com"
         "siteTitle", # e.g. "Contoso Project Site"
         "hubName", # e.g. "Contoso Hub"
+        "creators",  # Array of initial creator(s)
         "owners",  # Array of owners
         "members",  # Array of members
         "structure"  # Array of folder structure
@@ -39,7 +41,8 @@ try {
 
     # Boolean Felder (true/false), wenn nicht angegeben, dann true
     $booleanParams = @(
-        "TeamsTabAfterProvisioning", # true = Teams Tab anlegen nach Provisioning
+        "TeamsTabAfterProvisioning", # false = NUR Teams Tab anlegen (Provisioning überspringen)
+        "enableTabCreation", # Standard: true = Teams Tab anlegen
         "structureInDefaultChannelFolder",
         "enableProvisioning",
         "enableDocumentSets",
@@ -81,33 +84,41 @@ try {
     Test-Schema -structure $structure
 
     # --------------------------------------------------------------------
-    # 2) Alias / URLs
+    # Alias / URLs
     # --------------------------------------------------------------------
-    $base     = $tenantId.Split('.')[0]
-    $alias    = ($siteTitle -replace '\s+', '')
-    $teamId   = $alias  # Standardmäßig Alias als TeamId verwenden
-    $siteUrl  = "https://${base}.sharepoint.com/sites/$alias"
-    $adminUrl = "https://${base}-admin.sharepoint.com"
+    $TenantName = $tenantId.Split('.')[0]
+    $alias      = ($siteTitle -replace '\s+', '')
+    $teamId     = $alias  # Standardmäßig Alias als TeamId verwenden
+    $siteUrl    = "https://${TenantName}.sharepoint.com/sites/$alias"
+    $adminUrl   = "https://${TenantName}-admin.sharepoint.com"
+    
     Log "🔗 SiteUrl = $siteUrl"
 
     # --------------------------------------------------------------------
-    # Teams Tab anlegen in getrennter Function
+    # NUR Teams Tab anlegen (sonst nichts tun)
     # --------------------------------------------------------------------
-    #if ($TeamsTabAfterProvisioning) { 
-    if (-not $TeamsTabAfterProvisioning) { 
-        Log "---- TeamsTab-Function callen (HTTP) ----"
+    # Erlaube Teams Tab Creation nur, wenn Umgebungsvariable gesetzt ist
+    if ($env:ALLOW_TEAMS_TAB_CREATION -eq 'true') {
+        Log "ℹ️ ALLOW_TEAMS_TAB_CREATION is set, User defined Teams Tab creation = $enableTabCreation"            
+    } else {
+        $enableTabCreation = $false
+        Log "ℹ️ ALLOW_TEAMS_TAB_CREATION is not set, Teams Tab creation = $enableTabCreation"
+    }
+    
+    if (-not $TeamsTabAfterProvisioning -and $enableTabCreation) { 
+        Log "---- Call TeamsTab-Function (HTTP) ----"
 
-        $ContentUrl = "https://teams.sailing-ninoa.com"
-        $TeamsAppExternalId  = "2a357162-7738-459a-b727-8039af89a684"
+        $ContentUrl            = "https://teams.sailing-ninoa.com"
+        $TeamsAppExternalId    = "2a357162-7738-459a-b727-8039af89a684"
 
         $tabPayload = @{
             TeamId             = $teamId
             TenantId           = $tenantId
-            ChannelName        = ""
+            ChannelName        = ""                 # Standardkanal ""
             TabDisplayName     = $TabDisplayName
+            EntityId           = $TabDisplayName    #"AITab"
             ContentUrl         = $ContentUrl
             WebsiteUrl         = $ContentUrl
-            EntityId           = "AITab"
             TeamsAppExternalId = $TeamsAppExternalId
         } | ConvertTo-Json -Depth 5 -Compress
 
@@ -153,7 +164,7 @@ try {
     # ====================================================================
     # Start PnP PowerShell Modules for SharePoint Provisioning
     # --------------------------------------------------------------------
-    # 3) Module laden (PnP.PowerShell)
+    # Module laden (PnP.PowerShell)
     # --------------------------------------------------------------------
     #$PnPVersion = "1.12.0"
     $PnPVersion = "3.1.0"
@@ -166,29 +177,51 @@ try {
     Connect-PnP -Tenant $tenantId -SPOUrl $adminUrl
 
     # --------------------------------------------------------------------
-    # 5) Alias-Doppelcheck (M365-Gruppe)
+    # Check if Sharepoint Site (M365-Gruppe) already exists
     # --------------------------------------------------------------------
-    $aliasExists = Get-PnPMicrosoft365Group -IncludeSiteUrl |
-                   Where-Object { $_.GroupAlias -eq $alias }
+    Log "Check if Sharepoint Site (M365-Gruppe) '$alias' already exists..."
+    $result = Test-SpoSiteOrAliasExists -TenantName $TenantName -Alias $alias -ReturnFirstUrlOnly
+    if ($result.Exists) {
+        Log "⚠️ Sharepoint Site (M365-Gruppe) '$alias' already exists, use it..."
+        $siteUrl = $result.SiteUrl         # URL der Sharepoint-Site for later use
 
-    if ($aliasExists) {
-        Send-Resp 409 @{ error  = 'Site or group already exists'
-                         siteUrl = $aliasExists.SiteUrl }
-        return
+        # !!!Owners and Users temporär entfernen, dann neu provisionieren, dann wieder hinzufügen!
+
+        # Mit der Site verbinden
+        Log "App-Only Login to SharePoint SITE $alias"
+        Connect-PnP -Tenant $tenantId -SPOUrl $siteUrl
+
+        Log "📎 Get SPOGroupInfo for site '$siteUrl' ..."
+        $SPOGroupInfo = Get-SPOGroupInfo -siteUrl $siteUrl
+        #Log "SPOGroupInfo: $($SPOGroupInfo | ConvertTo-Json -Compress)"
+
+        $Type = $SPOGroupInfo.Type
+        if($Type -ne "TeamSite") {
+            Log "⚠️ Site Type is not TeamSite, but $Type. Cannot create a new TeamSite."
+            Send-Resp 400 @{ error = "Site Type is not TeamSite, but $Type. Cannot go on with provisioning!" }
+            return
+        }
+        
+        $SetRegion   = [string]$SPOGroupInfo.Lcid       # Region (z.B. 1031 = Deutsch) for later use
+
+        $alias       = $SPOGroupInfo.Alias              # for later use
+        $teamId      = $alias                           # for later use
+        $SPOUpdate   = $true                            # for later use
+        Log "Sharepoint-Site $siteTitle already exists, update provisioning ..."
+
+    } else {
+        # ------------------------------ Sharepoint-Site anlegen -----------------------------------
+        Log "Create Sharepoint-Site $siteTitle for Region: '$SetRegion' ..."
+        $Region    = [int]$SetRegion
+        New-PnPSite -Type TeamSite -Title $siteTitle -Alias $alias -Lcid $Region -Wait -ErrorAction Stop
+        $SPOUpdate = $false
+        Log "✅ Site created"
     }
 
-    # --------------------------------------------------------------------
-    # 6) Sharepoint-Site anlegen
-    # --------------------------------------------------------------------
-    # 1. Neue Site anlegen
-    Log "Create Sharepoint-Site $siteTitle for Region: '$SetRegion' ..."
-    $Region    = [int]$SetRegion
-    New-PnPSite -Type TeamSite -Title $siteTitle -Alias $alias -Lcid $Region -Wait -ErrorAction Stop
-    Log "✅ Site created"
-
+    # ------------------- optional: Sharepoint-Site Einstellungen ändern ----------------------
     if($SetTimezone) {
         Log "Set custom TimeZone: $SetTimezone, SortOrder: $SetSortOrder, Region: $SetRegion ..."
-        # 2. Mit der neuen Site verbinden
+        # Mit der neuen Site verbinden
         Log "App-Only Login to SharePoint SITE $siteTitle"
         Connect-PnP -Tenant $tenantId -SPOUrl $siteUrl
 
@@ -199,10 +232,10 @@ try {
         Set-PnPRegionalSettings `
             -TimeZone $Timezone `   # 4 = Mitteleuropäische Zeit (Berlin, Wien, Zürich)
             -SortOrder $SortOrder ` # 25 = Deutsch
-            -LocaleId $Region `  # 1031 = Deutsch
+            -LocaleId $Region `     # 1031 = Deutsch
             -CalendarType Gregorian
 
-        # 4. Mit der ADMIN Site verbinden
+        # Mit der ADMIN Site verbinden
         Log "App-Only Login to SharePoint ADMIN"
         Connect-PnP -Tenant $tenantId -SPOUrl $adminUrl
     }
@@ -239,18 +272,31 @@ try {
 
     Log "📎 GroupId = $groupId"
 
-    # --------------------------------------------------------------------
-    # 9) Owners / Members hinterlegen
-    # --------------------------------------------------------------------
-    Log "👑/👥 Set Owners/Members..."
+    # ----------------------------------------------------------------
+    # Standard Library der Gruppe triggern und Erstellung abwarten
+    # ----------------------------------------------------------------
+    Log "Standard Library der Gruppe triggern und Erstellung abwarten..."
 
-    if ($owners)  { Add-PnPMicrosoft365GroupOwner  -Identity $groupId -Users $owners }
-    if ($members) { Add-PnPMicrosoft365GroupMember -Identity $groupId -Users $members }
+    $driveResult = Wait-ForGroupDrive -groupId $groupId -DriveName ""
+    $drive       = $driveResult.drive
+    $libName     = $drive.name  # Bibliotheksname 
 
-    Log "👑/👥 Owners/Members set"
+    Log "Standard Library: '$libName' erstellt und verfügbar"
+    
+    # --------------------------------------------------------------------
+    # Creator als Owner hinterlegen
+    # --------------------------------------------------------------------
+    Log "👑/👥 Set Creator as Owner..."
+    if ($creators) {
+        Set-M365GroupOwners -GroupId $groupId -Users $creators
+    }
+    else {
+        Log "ℹ️ No owners specified, skipping further steps."
+        Send-Resp 400 @{ error = "No owners specified for group '$alias'" }
+    }
 
     # --------------------------------------------------------------------
-    # 10) Teams-Team erstellen (falls noch nicht vorhanden)
+    # Teams-Team erstellen (falls noch nicht vorhanden)
     # --------------------------------------------------------------------
     Log "ℹ️ Create Teams Team $alias ..."
 
@@ -281,17 +327,6 @@ try {
         Log "⚠️ Teams Team creation failed: $($_.Exception.Message)"
     }
     
-    # ----------------------------------------------------------------
-    # 11) Standard Library der Gruppe triggern und Erstellung abwarten
-    # ----------------------------------------------------------------
-    Log "Standard Library der Gruppe triggern und Erstellung abwarten..."
-
-    $driveResult = Wait-ForGroupDrive -groupId $groupId -DriveName ""
-    $drive       = $driveResult.drive
-    $libName     = $drive.name  # Bibliotheksname 
-
-    Log "Standard Library: '$libName' erstellt und verfügbar"
-    
     # ==============================================================
     # Ab hier: SITE Provisioning - App-Only Login to SharePoint SITE
     # ==============================================================
@@ -300,7 +335,7 @@ try {
         Connect-PnP -Tenant $tenantId -SPOUrl $siteUrl
 
         Log "Start XML Provisioning for Site '$siteTitle' ..."
-        $templateFolder = Join-Path $PSScriptRoot 'provisioning\01_Site'  # Pfad zu XML-Dateien
+        $SiteTemplates = Join-Path $PSScriptRoot 'provisioning\01_Site'  # Pfad zu XML-Dateien
 
         # ----------------------------------------------------------------
         # Wenn eigener DMSdrive angegeben ist, dann DMS-Bibliothek anlegen
@@ -336,7 +371,7 @@ try {
         # TERM SETS XML Site Provisioning
         $XMLSchema = "TermSets_2022.xml"
         Log "📋 Bereitstellen von $XMLSchema"
-        ProvisionPnPSite -siteUrl $siteUrl -templateFolder $templateFolder -template $XMLSchema
+        ProvisionPnPSite -siteUrl $siteUrl -templateFolder $SiteTemplates -template $XMLSchema
     }
     
     # ------------------------------------------------------------------
@@ -357,17 +392,53 @@ try {
         # SITE COLUMNS PREPROCESSED
         $XMLSchema = "SiteCollection_SiteColumns_Preprocessed_2022.xml"
         Log "📋 Bereitstellen von $XMLSchema"
-        ProvisionPnPSite -siteUrl $siteUrl -templateFolder $templateFolder -template $XMLSchema
-
-        # SITE COLUMNS CALCULATED
-        $XMLSchema = "SiteCollection_SiteColumns_Calculated_2022.xml"
-        Log "📋 Bereitstellen von $XMLSchema"
-        ProvisionPnPSite -siteUrl $siteUrl -templateFolder $templateFolder -template $XMLSchema
+        ProvisionPnPSite -siteUrl $siteUrl -templateFolder $SiteTemplates -template $XMLSchema
 
         # CONTENT TYPES
         $XMLSchema = "SiteCollection_ContentTypes_2022.xml"
         Log "📋 Bereitstellen von $XMLSchema"
-        ProvisionPnPSite -siteUrl $siteUrl -templateFolder $templateFolder -template $XMLSchema
+        ProvisionPnPSite -siteUrl $siteUrl -templateFolder $SiteTemplates -template $XMLSchema
+
+        # SITE COLUMNS CALCULATED
+        $XMLSchema = "SiteCollection_SiteColumns_Calculated_2022.xml"
+        Log "📋 Bereitstellen von $XMLSchema"
+
+        # Wenn SPOUpdate = true, dann müssen die berechneten Felder entfernt und neu angelegt werden
+        if($SPOUpdate) {
+            # Welche berechneten Site Columns machen Ärger?
+            # !!! Berechnete Felder künftig aus der XML Datei lesen !
+
+            $calcFields = @("mvSubject","mvHasAttachments","mvAttachmentIcon")
+            Log "🔧 Berechnete Felder: $($calcFields -join ', ')"
+
+            # --- DETACH: alle betroffenen Listen einsammeln und Feldbindungen lösen ---
+            Log "Entferne temporär die Felder: $($calcFields -join ', ') aus den betroffenen Listen..."
+            $affected = @{}
+            foreach ($f in $calcFields) {
+                $lists = Find-ListsUsingField -FieldInternalName $f
+                $affected[$f] = $lists
+                foreach ($l in $lists) {
+                    Log "🔧 Entferne temporär '$f' aus Liste '$($l.Title)' ($($l.RootFolder.ServerRelativeUrl))"
+                    Detach-FieldFromList -List $l -FieldInternalName $f
+                }
+            }
+
+            # --- UPDATE: jetzt Calculated-Template anwenden ---
+            ProvisionPnPSite -siteUrl $siteUrl -templateFolder $SiteTemplates -template $XMLSchema
+
+            # --- REATTACH: Felder wieder an die vormals betroffenen Listen binden ---
+            Log "🔧 Binde die Felder: $($calcFields -join ', ') wieder an die betroffenen Listen..."
+            foreach ($f in $calcFields) {
+                foreach ($l in $affected[$f]) {
+                    Log "↩️ Binde '$f' wieder an Liste '$($l.Title)'"
+                    Reattach-FieldToListViaDocumentCT -List $l -FieldInternalName $f
+                }
+            }
+            Log "✅ Detach→Update→Reattach abgeschlossen."
+        } else {
+            # --- NEW: Calculated-Template anwenden ---
+            ProvisionPnPSite -siteUrl $siteUrl -templateFolder $SiteTemplates -template $XMLSchema
+        }
 
         Log "✅ Site Provisioning abgeschlossen!"
 
@@ -417,7 +488,7 @@ try {
         $LibEnableProvisioning = $true  # Setze auf $true, um Document Library Provisioning zu starten
         if ($LibEnableProvisioning) { 
             # LIBRARY PROVISIONING (upgrade)
-            $templateFolder = Join-Path $PSScriptRoot 'provisioning\02_Library'  # Pfad zu XML-Dateien
+            $LibraryTemplates = Join-Path $PSScriptRoot 'provisioning\02_Library'  # Pfad zu XML-Dateien
 
             Log "Starte Library Provisioning mit PnP XML-Vorlagen..."
             if( -not $DMSdrive) {
@@ -443,7 +514,7 @@ try {
                 }
             
             Log "📋 Bereitstellen von $XMLSchema"
-            ProvisionPnPSite -siteUrl $siteUrl -templateFolder $templateFolder -template $XMLSchema
+            ProvisionPnPSite -siteUrl $siteUrl -templateFolder $LibraryTemplates -template $XMLSchema
 
             Log "✅ Library Provisioning abgeschlossen!"
         }
@@ -500,7 +571,7 @@ try {
     }
 
     # ------------------------------------------------------------------------
-    # 14) Ordnerstruktur für Projekt anlegen (option: unter General/Allgemein)
+    # Ordnerstruktur für Projekt anlegen (option: unter General/Allgemein)
     # ------------------------------------------------------------------------
     if ($structure) {
         Log "Ordnerstruktur anlegen ..."
@@ -584,10 +655,9 @@ try {
     }
 
     # --------------------------------------------------------------------
-    # Teams Tab anlegen in getrennter Function
+    # Teams Tab anlegen in eigener Function (HTTP POST Call)
     # --------------------------------------------------------------------
-    #if ($TeamsTabAfterProvisioning) { 
-    if ($TeamsTabAfterProvisioning) { 
+    if ($TeamsTabAfterProvisioning -and $enableTabCreation) { 
         Log "---- TeamsTab-Function callen (HTTP) ----"
 
         $ContentUrl = "https://teams.sailing-ninoa.com"
@@ -635,6 +705,16 @@ try {
             throw "Aufruf TeamsTab fehlgeschlagen: $msg"
         }
     }
+
+    # --------------------------------------------------------------------
+    # Owners / Members hinterlegen
+    # --------------------------------------------------------------------
+    Log "👑/👥 Set Owners/Members..."
+
+    if ($owners) {Set-M365GroupOwners -GroupId $groupId -Users $owners}
+    if ($members) {Set-M365GroupMembers -GroupId $groupId -Users $members}
+
+    Log "👑/👥 Owners/Members set"
 
     # --------------------------------------------------------------------
     # Fertig
