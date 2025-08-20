@@ -10,6 +10,10 @@ $helpersDir   = Join-Path $functionRoot 'Helpers'
 . (Join-Path $helpersDir 'ProvisionPnP.ps1')
 . (Join-Path $helpersDir 'PSHelpers.ps1')
 
+# ------------- ENV-Variables ----------------------------
+$ALLOW_TEAMS_TAB_CREATION = 'true'   # $env:ALLOW_TEAMS_TAB_CREATION
+$TEAMS_TAB_FUNC_URL       = $env:TEAMS_TAB_FUNC_URL
+$TEAMS_TAB_FUNC_KEY       = $env:TEAMS_TAB_FUNC_KEY
 # ------------- Framework-Helpers ----------------------------
 $InformationPreference = 'Continue'
 $CurDir                = Get-Location
@@ -108,7 +112,7 @@ Log "Eingaben prüfen und Variablen initialisieren..."
     # NUR Teams Tab anlegen (sonst nichts tun)
     # --------------------------------------------------------------------
     # Erlaube Teams Tab Creation nur, wenn Umgebungsvariable gesetzt ist
-    if ($env:ALLOW_TEAMS_TAB_CREATION -eq 'true') {
+    if ($ALLOW_TEAMS_TAB_CREATION -eq 'true') {
         Log "ℹ️ ALLOW_TEAMS_TAB_CREATION is set, User defined Teams Tab creation = $enableTabCreation"            
     } else {
         $enableTabCreation = $false
@@ -132,21 +136,17 @@ Log "Eingaben prüfen und Variablen initialisieren..."
             TeamsAppExternalId = $TeamsAppExternalId
         } | ConvertTo-Json -Depth 5 -Compress
 
-        # Funktions-URL & Key aus App Settings (lokal: local.settings.json; Azure: Configuration)
-        $teamsTabUrl = $env:TEAMS_TAB_FUNC_URL
-        $teamsTabKey = $env:TEAMS_TAB_FUNC_KEY
-
-        if ([string]::IsNullOrWhiteSpace($teamsTabUrl)) { throw "TEAMS_TAB_FUNC_URL ist nicht gesetzt." }
+        if ([string]::IsNullOrWhiteSpace($TEAMS_TAB_FUNC_URL)) { throw "TEAMS_TAB_FUNC_URL ist nicht gesetzt." }
 
         # Für authLevel=function den Key anhängen
-        if (-not [string]::IsNullOrWhiteSpace($teamsTabKey)) {
-            if ($teamsTabUrl -notmatch '\?') { $teamsTabUrl += "?code=$teamsTabKey" }
-            else { $teamsTabUrl += "&code=$teamsTabKey" }
+        if (-not [string]::IsNullOrWhiteSpace($TEAMS_TAB_FUNC_KEY)) {
+            if ($TEAMS_TAB_FUNC_URL -notmatch '\?') { $TEAMS_TAB_FUNC_URL += "?code=$TEAMS_TAB_FUNC_KEY" }
+            else { $TEAMS_TAB_FUNC_URL += "&code=$TEAMS_TAB_FUNC_KEY" }
         }
 
-        Log "TeamsTab HTTP aufrufen: $teamsTabUrl"
+        Log "TeamsTab HTTP aufrufen: $TEAMS_TAB_FUNC_URL"
         try {
-            $resp = Invoke-RestMethod -Method POST -Uri $teamsTabUrl `
+            $resp = Invoke-RestMethod -Method POST -Uri $TEAMS_TAB_FUNC_URL `
                 -ContentType 'application/json; charset=utf-8' `
                 -Body $tabPayload -TimeoutSec 120
             Log "TeamsTab Response: $($resp | ConvertTo-Json -Compress)"
@@ -764,21 +764,17 @@ Log "Eingaben prüfen und Variablen initialisieren..."
             TeamsAppExternalId = $TeamsAppExternalId
         } | ConvertTo-Json -Depth 5 -Compress
 
-        # Funktions-URL & Key aus App Settings (lokal: local.settings.json; Azure: Configuration)
-        $teamsTabUrl = $env:TEAMS_TAB_FUNC_URL
-        $teamsTabKey = $env:TEAMS_TAB_FUNC_KEY
-
-        if ([string]::IsNullOrWhiteSpace($teamsTabUrl)) { throw "TEAMS_TAB_FUNC_URL ist nicht gesetzt." }
+        if ([string]::IsNullOrWhiteSpace($TEAMS_TAB_FUNC_URL)) { throw "TEAMS_TAB_FUNC_URL ist nicht gesetzt." }
 
         # Für authLevel=function den Key anhängen
-        if (-not [string]::IsNullOrWhiteSpace($teamsTabKey)) {
-            if ($teamsTabUrl -notmatch '\?') { $teamsTabUrl += "?code=$teamsTabKey" }
-            else { $teamsTabUrl += "&code=$teamsTabKey" }
+        if (-not [string]::IsNullOrWhiteSpace($TEAMS_TAB_FUNC_KEY)) {
+            if ($TEAMS_TAB_FUNC_URL -notmatch '\?') { $TEAMS_TAB_FUNC_URL += "?code=$TEAMS_TAB_FUNC_KEY" }
+            else { $TEAMS_TAB_FUNC_URL += "&code=$TEAMS_TAB_FUNC_KEY" }
         }
 
-        Log "TeamsTab HTTP aufrufen: $teamsTabUrl"
+        Log "TeamsTab HTTP aufrufen: $TEAMS_TAB_FUNC_URL"
         try {
-            $resp = Invoke-RestMethod -Method POST -Uri $teamsTabUrl `
+            $resp = Invoke-RestMethod -Method POST -Uri $TEAMS_TAB_FUNC_URL `
                 -ContentType 'application/json; charset=utf-8' `
                 -Body $tabPayload -TimeoutSec 120
             Log "TeamsTab Response: $($resp | ConvertTo-Json -Compress)"
