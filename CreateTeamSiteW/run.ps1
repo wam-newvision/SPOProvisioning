@@ -35,8 +35,7 @@ Log "Eingaben prüfen und Variablen initialisieren..."
         "hubName", # e.g. "Contoso Hub"
         "creators",  # Array of initial creator(s)
         "owners",  # Array of owners
-        "members",  # Array of members
-        "structure"  # Array of folder structure
+        "members"  # Array of members
     )
 
     # Boolean Felder (true/false), wenn nicht angegeben, dann true
@@ -51,6 +50,8 @@ Log "Eingaben prüfen und Variablen initialisieren..."
 
     # Optionale Felder (nur falls nötig)
     $optionalParams = @(
+        @{ Name = "structure"; Default = "" },     # Array of folder structure
+        @{ Name = "Privacy"; Default = "Private" },     # Privacy setting for the site (Private/Public)
         @{ Name = "DMSdrive"; Default = $null },
         @{ Name = "SetRegion"; Default = "1031" },    # 1031 = Deutsch (Deutschland)
         @{ Name = "SetTimezone"; Default = "" },      # 4 = Mitteleuropäische Zeit (Berlin, Wien, Zürich), nur setzen, wenn Region != 1031
@@ -80,8 +81,17 @@ Log "Eingaben prüfen und Variablen initialisieren..."
 
     # --------------------------------------------------------------------
     # Ordnerstruktur-Schema prüfen
-    Log "Check Folder structure schema for Site '$siteTitle'"
-    Test-Schema -structure $structure
+    if ($structure) {
+        Log "Check Folder structure schema for Site '$siteTitle'"
+        if(Test-Schema -structure $structure) {
+            Log "✅ Folder structure schema is valid."
+        } else {
+            Log "❌ Invalid folder structure schema for Site '$siteTitle'."
+            $structure = ""
+        }
+    } else {
+        Log "ℹ️ No folder structure provided for Site '$siteTitle'."
+    }
 
     # --------------------------------------------------------------------
     # Alias / URLs
@@ -185,8 +195,6 @@ Log "Eingaben prüfen und Variablen initialisieren..."
         Log "⚠️ Sharepoint Site (M365-Gruppe) '$alias' already exists, use it..."
         $siteUrl = $result.SiteUrl         # URL der Sharepoint-Site for later use
 
-        # !!!Owners and Users temporär entfernen, dann neu provisionieren, dann wieder hinzufügen!
-
         # Mit der Site verbinden
         Log "App-Only Login to SharePoint SITE $alias"
         Connect-PnP -Tenant $tenantId -SPOUrl $siteUrl
@@ -201,19 +209,99 @@ Log "Eingaben prüfen und Variablen initialisieren..."
             Send-Resp 400 @{ error = "Site Type is not TeamSite, but $Type. Cannot go on with provisioning!" }
             return
         }
-        
+
+        $groupId     = $SPOGroupInfo.GroupId
+        $grp         = Get-PnPMicrosoft365Group -Identity $groupId
+        $grpName     = $grp.DisplayName
+
         $SetRegion   = [string]$SPOGroupInfo.Lcid       # Region (z.B. 1031 = Deutsch) for later use
 
         $alias       = $SPOGroupInfo.Alias              # for later use
         $teamId      = $alias                           # for later use
         $SPOUpdate   = $true                            # for later use
+
         Log "Sharepoint-Site $siteTitle already exists, update provisioning ..."
+
+        # Users temporär entfernen, dann neu provisionieren, dann wieder hinzufügen...
+        $finalMembers = Get-PnPMicrosoft365GroupMember -Identity $GroupId -ErrorAction SilentlyContinue
+        $finalMembers = $finalMembers |
+                    ForEach-Object { $_.UserPrincipalName ?? $_.Mail } |
+                    Where-Object { $_ } |
+                    ForEach-Object { $_.Trim().ToLower() }
+        Log "📋 Aktuelle Members: $($finalMembers -join ', ')"
+
+        if ($finalMembers.Count -gt 0) {
+            Log "Remove all members from group '$grpName' ..."
+            Remove-PnPMicrosoft365GroupMember -Identity $groupId -Users $finalMembers
+            Log "📋 Actual Members removed but stored."
+        } else {
+            Log "Gruppe '$grpName' ist bereits leer."
+        }
+
+        Log "👑/👥 Set Creator as Owner..."
+        if ($creators) {
+            Set-M365GroupOwners -GroupId $groupId -Users $creators
+        }
+        else {
+            Log "ℹ️ No owners specified, skipping further steps."
+            Send-Resp 400 @{ error = "No owners specified for group '$alias'" }
+        }
+
+        $finalOwners  = Get-PnPMicrosoft365GroupOwner -Identity $GroupId -ErrorAction SilentlyContinue
+        $finalOwners = $finalOwners |
+                    ForEach-Object { $_.UserPrincipalName ?? $_.Mail } |
+                    Where-Object { $_ } |
+                    ForEach-Object { $_.Trim().ToLower() } |
+                    Sort-Object -Unique
+        Log "📋 Aktuelle Owners  : $($finalOwners -join ', ')"
+
+        # 3) Vergleichslisten normalisieren
+        [string[]]$creatorsNorm = $creators |
+                    ForEach-Object { $_.Trim().ToLowerInvariant() } |
+                    Sort-Object -Unique
+        Log "📋 Creators normiert: $($creatorsNorm -join ', ')"
+
+        $toRemove  = $finalOwners | Where-Object { $creatorsNorm -notcontains $_ }
+        Log "📋To Remove: $($toRemove -join ', ')"
+
+        if ($null -eq $toRemove -or $toRemove.Count -eq 0) {
+            Log "Gruppe '$grpName' ist bereits leer."
+        } else {
+            Log "Remove all owners from group '$grpName' ..."
+            Remove-PnPMicrosoft365GroupOwner -Identity $groupId -Users $toRemove
+            Log "📋 Actual Owners removed but stored."
+        }
+
+        if($Privacy -ne $SPOGroupInfo.Privacy) {
+            # Mit der Admin-Site verbinden
+            Log "App-Only Login to SharePoint ADMIN"
+            Connect-PnP -Tenant $tenantId -SPOUrl $adminUrl
+
+            If ($Privacy -eq "Private") {
+                Set-PnPMicrosoft365Group -Identity $groupId -IsPrivate:$true  
+            } else {
+                Set-PnPMicrosoft365Group -Identity $groupId -IsPrivate:$false  
+            }
+            Log "⚠️ Privacy setting for site '$siteTitle' changed from '$($SPOGroupInfo.Privacy)' to '$Privacy'."
+
+            # Mit der Site verbinden
+            Log "App-Only Login to SharePoint SITE $alias"
+            Connect-PnP -Tenant $tenantId -SPOUrl $siteUrl
+
+        }
 
     } else {
         # ------------------------------ Sharepoint-Site anlegen -----------------------------------
+        Log "Sharepoint Site (M365-Gruppe) '$alias' does not exists."
         Log "Create Sharepoint-Site $siteTitle for Region: '$SetRegion' ..."
         $Region    = [int]$SetRegion
-        New-PnPSite -Type TeamSite -Title $siteTitle -Alias $alias -Lcid $Region -Wait -ErrorAction Stop
+        if($Privacy -eq "Public") {
+            Log "Create Public Sharepoint-Site $siteTitle ..."
+            New-PnPSite -Type TeamSite -IsPublic -Title $siteTitle -Alias $alias -Lcid $Region -Wait -ErrorAction Stop
+        } else {
+            Log "Create Private Sharepoint-Site $siteTitle ..."
+            New-PnPSite -Type TeamSite -Title $siteTitle -Alias $alias -Lcid $Region -Wait -ErrorAction Stop
+        }   
         $SPOUpdate = $false
         Log "✅ Site created"
     }
@@ -419,7 +507,7 @@ Log "Eingaben prüfen und Variablen initialisieren..."
                 $affected[$f] = $lists
                 foreach ($l in $lists) {
                     Log "🔧 Entferne temporär '$f' aus Liste '$($l.Title)' ($($l.RootFolder.ServerRelativeUrl))"
-                    Detach-FieldFromList -List $l -FieldInternalName $f
+                    DetachFieldFromList -List $l -FieldInternalName $f
                 }
             }
 
@@ -431,7 +519,7 @@ Log "Eingaben prüfen und Variablen initialisieren..."
             foreach ($f in $calcFields) {
                 foreach ($l in $affected[$f]) {
                     Log "↩️ Binde '$f' wieder an Liste '$($l.Title)'"
-                    Reattach-FieldToListViaDocumentCT -List $l -FieldInternalName $f
+                    ReattachFieldToListViaDocumentCT -List $l -FieldInternalName $f
                 }
             }
             Log "✅ Detach→Update→Reattach abgeschlossen."
@@ -573,7 +661,9 @@ Log "Eingaben prüfen und Variablen initialisieren..."
     # ------------------------------------------------------------------------
     # Ordnerstruktur für Projekt anlegen (option: unter General/Allgemein)
     # ------------------------------------------------------------------------
-    if ($structure) {
+    if (-not $structure) {
+        Log "Keine Ordnerstruktur zum Anlegen angegeben. Skipping folder structure creation."
+    } else {
         Log "Ordnerstruktur anlegen ..."
 
         # ==============================================================
@@ -709,10 +799,13 @@ Log "Eingaben prüfen und Variablen initialisieren..."
     # --------------------------------------------------------------------
     # Owners / Members hinterlegen
     # --------------------------------------------------------------------
-    Log "👑/👥 Set Owners/Members..."
-
+    Log "👑/👥 Set Owners ..."
     if ($owners) {Set-M365GroupOwners -GroupId $groupId -Users $owners}
+    if ($finalOwners) {Set-M365GroupOwners -GroupId $groupId -Users $finalOwners}
+
+    Log "👑/👥 Set Members ..."
     if ($members) {Set-M365GroupMembers -GroupId $groupId -Users $members}
+    if ($finalMembers) {Set-M365GroupMembers -GroupId $groupId -Users $finalMembers}
 
     Log "👑/👥 Owners/Members set"
 

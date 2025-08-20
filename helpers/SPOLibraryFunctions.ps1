@@ -582,9 +582,13 @@ function Get-SPOGroupInfo {
         } catch { }
     }
 
+    $Privacy = ""
     # --- Type herleiten
     if ($web.WebTemplate -eq 'GROUP' -and $groupId -ne [guid]::Empty) {
         $Type = 'TeamSite'
+        $grp = Get-PnPMicrosoft365Group -Identity $site.GroupId
+        $Privacy = $grp.Visibility   # -> "Public" oder "Private"
+        Log "Group Visibility (Private/Public): $Privacy"
     } elseif ($web.WebTemplate -eq 'SITEPAGEPUBLISHING') {
         $Type = 'CommunicationSite'
     } else {
@@ -624,6 +628,7 @@ function Get-SPOGroupInfo {
         CalendarType = $CalType
         GroupId      = $groupId
         SiteUrl      = $web.Url
+        Privacy      = $Privacy
     }
 }
 # ------------------------------------------------------------------------------------
@@ -648,7 +653,7 @@ function Find-ListsUsingField {
 }
 
 # ------------------------------------------------------------------------------------
-function Detach-FieldFromList {
+function DetachFieldFromList {
     param([Parameter(Mandatory)]$List,[Parameter(Mandatory)][string]$FieldInternalName)
 
     # Content Types aktivieren, sonst können wir nicht sauber über CTs arbeiten
@@ -705,7 +710,7 @@ function Get-OrAttach-DocumentCT {
 
 # ------------------------------------------------------------------------------------
 <#
-function Reattach-FieldToListViaDocumentCT {
+function ReattachFieldToListViaDocumentCT {
     param([Parameter(Mandatory)]$List,[Parameter(Mandatory)][string]$FieldInternalName)
 
     $docCt = Get-OrAttach-DocumentCT -List $List   # <-- statt Get-PnPContentType -Identity "Document"
@@ -713,7 +718,7 @@ function Reattach-FieldToListViaDocumentCT {
 }
 #>
 
-function Reattach-FieldToListViaDocumentCT {
+function ReattachFieldToListViaDocumentCT {
     param([Parameter(Mandatory)]$List,[Parameter(Mandatory)][string]$FieldInternalName)
 
     if (-not $List.ContentTypesEnabled) {

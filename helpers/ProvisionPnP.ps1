@@ -29,7 +29,8 @@ function ProvisionPnPSite {
     )
     
     $templatePath = Join-Path $templateFolder $template  # Pfad zu XML-Datei
-    Log "Provisioniere SPO Site $siteUrl mit $templatePath"
+    Log "Provisioniere SPO Site: $siteUrl"
+    Log "Template: $templatePath"
 
     $result = Invoke-PnPSiteTemplate -Path "$templatePath"
     Log "Invoke-PnPSiteTemplate Result $($result | Out-String)"

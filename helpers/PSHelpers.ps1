@@ -112,8 +112,11 @@ function Test-Schema {
         try {
             $structure = $structure | ConvertFrom-Json
         } catch {
-            Send-Resp 400 @{ error = "Structure is not valid JSON." }
-            throw "Structure is not valid JSON."
+            #Send-Resp 400 @{ error = "Structure is not valid JSON." }
+            #throw "Structure is not valid JSON."
+            Log "Structure is not valid JSON."
+            $structure = ""
+            return $structure
         }
     }
 
@@ -128,10 +131,14 @@ function Test-Schema {
     Log "structureJson = $structureJson"
 
     if (-not (Test-Json -Json $structureJson -Schema $schema)) {
-        Send-Resp 400 @{ error = "Invalid structure format. Must follow folder schema with 'name' and optional 'children'." }
-        throw "Invalid structure format. Must follow folder schema with 'name' and optional 'children'."
+        #Send-Resp 400 @{ error = "Invalid structure format. Must follow folder schema with 'name' and optional 'children'." }
+        #throw "Invalid structure format. Must follow folder schema with 'name' and optional 'children'."
+        Log "Invalid structure format. Must follow folder schema with 'name' and optional 'children'."
+        $structure = ""
+        return $structure
     } else {
         Log "Structure JSON is valid."
+        return $structure
     }
 }
 # --------------------------------------------------------------------
