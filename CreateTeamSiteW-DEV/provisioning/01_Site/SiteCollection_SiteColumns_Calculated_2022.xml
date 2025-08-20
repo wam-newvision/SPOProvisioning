@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pnp:Provisioning xmlns:pnp="http://schemas.dev.office.com/PnP/2022/09/ProvisioningSchema">
+  <pnp:Preferences Generator="OfficeDevPnP.Core, Version=2.28.1807.0, Culture=neutral, PublicKeyToken=5e633289e95c321a" />
+  <pnp:Templates ID="CONTAINER-TEMPLATE-00130E33A7B24A12A4C21F20ADA2D6F8">
+    <pnp:ProvisioningTemplate ID="TEMPLATE-00130E33A7B24A12A4C21F20ADA2D6F8" Version="1" BaseSiteTemplate="GROUP#0" Scope="RootSite">
+      <pnp:SiteFields>
+        <Field Name="mvSubject" ID="{ca0f980f-8f12-4c3c-9054-cfb9cb8e0d54}" Type="Calculated" DisplayName="Subject" ResultType="Text" Group="MacroView DMF Columns" StaticName="mvSubject" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" ReadOnly="TRUE">
+          <Formula>=[mvConversationTopic]</Formula>
+        </Field>
+        <Field Name="mvHasAttachments" ID="{8a522278-4487-459c-ae7b-e96f6ee55020}" Type="Calculated" DisplayName="Attachments" Indexed="FALSE" Format="DateOnly" ResultType="Boolean" Group="MacroView DMF Columns" StaticName="mvHasAttachments" Required="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" ReadOnly="TRUE">
+          <Formula>=IFERROR(INT([mvAttach_x0020_Count])&gt;0,FALSE)</Formula>
+        </Field>
+        <Field Name="mvAttachmentIcon" ID="{870a5584-7868-4b82-9314-50ee04eb2c5e}" Type="Calculated" DisplayName="📎" Indexed="FALSE" ResultType="Text" LCID="1033" Group="MacroView DMF Columns" StaticName="mvAttachmentIcon" Required="FALSE" SourceID="{7694beb4-4f1b-47f4-9133-845cf2363e6b}" AllowDeletion="TRUE" ReadOnly="TRUE">
+          <Formula>=IF(IFERROR(INT([mvAttach_x0020_Count])&gt;0,FALSE),"📎"," ")</Formula>
+        </Field>
+      </pnp:SiteFields>
+    </pnp:ProvisioningTemplate>
+  </pnp:Templates>
+</pnp:Provisioning>

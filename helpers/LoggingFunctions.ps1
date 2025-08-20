@@ -15,33 +15,18 @@ function Log {
     }
 }
 
-# --------------------------------------------------------------------
-
-<# OLD: Helper-Funktion für Logging
-function Log {
-   param (
-        [string[]]$fn = $MyInvocation.MyCommand.Namespace
-   )    
-    if ($IsDebug) { 
-        Log "🔧 Start [$fn] from $PSScriptRoot ..."
-
-        Write-Information ($args -join " ")
-    } 
-}
-#>    
-
 # ------------------------------------------------------------------------
 # Fehlerbehandlung Helper
 # ------------------------------------------------------------------------
+
 function ErrorExit {
     param([Parameter(ValueFromRemainingArguments=$true)]$Text)
     Write-Host "❌ $($Text -join ' ')" -ForegroundColor Red
     exit 1
 }
-
 # --------------------------------------------------------------------
+
 function Send-Resp([int]$code, [object]$body) {
     Push-OutputBinding -Name Response -Value @{ StatusCode = $code; Body = $body }
 }
-
 # --------------------------------------------------------------------

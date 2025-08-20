@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pnp:Provisioning xmlns:pnp="http://schemas.dev.office.com/PnP/2022/09/ProvisioningSchema">
+  <pnp:Preferences Generator="PnP.Framework, Version=1.18.0.0" />
+  <pnp:Templates ID="DELTA-UPGRADE">
+    <pnp:ProvisioningTemplate ID="DELTA-UPGRADE-TEMPLATE">
+
+      <!-- Alle benutzerdefinierten Felder, die in Views & List verwendet werden -->
+      <pnp:SiteFields>
+        <Field Name="mvAttach_x0020_Count" ID="{6775ca14-9bcd-4568-a8cb-6a6e7d2bd402}" Type="Text" DisplayName="Attach Count" Required="FALSE" Indexed="FALSE" MaxLength="255" Group="MacroView DMF Columns" StaticName="mvAttach_x0020_Count" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvCC" ID="{f8706816-413b-4e25-8972-b69ed7ee0487}" Type="Text" DisplayName="CC" Required="FALSE" Indexed="FALSE" MaxLength="255" Group="MacroView DMF Columns" StaticName="mvCC" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvOriginal_x0020_Author" ID="{e25e461e-afed-4984-9834-153b65f8055f}" Type="Text" DisplayName="Original Author" Required="FALSE" Indexed="FALSE" MaxLength="255" Group="MacroView DMF Columns" StaticName="mvOriginal_x0020_Author" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvBCC" ID="{38d73b32-349d-4695-914a-72aaaf1839cd}" Type="Text" DisplayName="BCC" Required="FALSE" Indexed="FALSE" MaxLength="255" Group="MacroView DMF Columns" StaticName="mvBCC" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvTrackingTag" ID="{00e8ec3b-060c-4532-85c7-475f46169d42}" Type="Text" DisplayName="Tracking Tag" Required="FALSE" Indexed="FALSE" MaxLength="255" Group="MacroView DMF Columns" StaticName="mvTrackingTag" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvConversationTopic" ID="{8918ff3f-2d47-479f-afbc-ed71571e8ae2}" Type="Text" DisplayName="Conversation Topic" Required="FALSE" Indexed="FALSE" MaxLength="255" Group="MacroView DMF Columns" StaticName="mvConversationTopic" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvOriginal_x0020_Modified" ID="{d9f27c42-fe75-4d0f-881b-e353638a13e4}" FromBaseType="FALSE" Type="DateTime" DisplayName="Original Modified" Required="FALSE" Indexed="FALSE" Format="DateTime" Group="MacroView DMF Columns" StaticName="mvOriginal_x0020_Modified" CalType="0" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvImportance" ID="{05619d50-29e0-4e67-8563-4d1b69fb9cb2}" Type="Text" DisplayName="Importance" Required="FALSE" Indexed="FALSE" MaxLength="255" Group="MacroView DMF Columns" StaticName="mvImportance" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvOriginal_x0020_Producer" ID="{4af91665-7ec3-4ba3-a262-54652bd8b473}" Type="Text" DisplayName="Original Producer" Required="FALSE" Indexed="FALSE" MaxLength="255" Group="MacroView DMF Columns" StaticName="mvOriginal_x0020_Producer" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvOriginal_x0020_FileName" ID="{abe3cc77-e806-4297-8739-c435a27998a3}" Type="Text" DisplayName="Original FileName" Required="FALSE" Indexed="FALSE" MaxLength="255" Group="MacroView DMF Columns" StaticName="mvOriginal_x0020_FileName" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvSentOn" ID="{11196889-ccb9-43f6-a378-7a1d2ae1ae92}" FromBaseType="FALSE" Type="DateTime" DisplayName="Sent On" Required="FALSE" Indexed="FALSE" Format="DateTime" Group="MacroView DMF Columns" StaticName="mvSentOn" CalType="0" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvReceivedTime" ID="{83599b91-819f-4974-a9e0-31bb64570a5a}" FromBaseType="FALSE" Type="DateTime" DisplayName="Received Time" Required="FALSE" Indexed="FALSE" Format="DateTime" Group="MacroView DMF Columns" StaticName="mvReceivedTime" CalType="0" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvFrom" ID="{c218c8ad-942f-45d0-9735-6e30d11fac2a}" Type="Text" DisplayName="From" Required="FALSE" Indexed="FALSE" MaxLength="255" Group="MacroView DMF Columns" StaticName="mvFrom" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvMessageID" ID="{e160c0b3-fe16-4132-84dc-bf82837c6cc8}" Type="Text" DisplayName="Message ID" Required="FALSE" Indexed="FALSE" MaxLength="255" Group="MacroView DMF Columns" StaticName="mvMessageID" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvSensitivity" ID="{2b419db5-4e99-4da1-8ac2-327409ba562d}" Type="Text" DisplayName="Sensitivity" Required="FALSE" Indexed="FALSE" MaxLength="255" Group="MacroView DMF Columns" StaticName="mvSensitivity" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvTo" ID="{ca6d4bf6-f9fe-46c4-ae52-45f4b5d9dc7a}" Type="Text" DisplayName="To" Required="FALSE" Indexed="FALSE" MaxLength="255" Group="MacroView DMF Columns" StaticName="mvTo" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvOriginal_x0020_Created" ID="{5a71bcfa-ccd5-4f24-af52-8ed5df336668}" FromBaseType="FALSE" Type="DateTime" DisplayName="Original Created" Required="FALSE" Indexed="FALSE" Format="DateTime" Group="MacroView DMF Columns" StaticName="mvOriginal_x0020_Created" CalType="0" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" />
+        <Field Name="mvSubject" ID="{ca0f980f-8f12-4c3c-9054-cfb9cb8e0d54}" Type="Calculated" DisplayName="Subject" ResultType="Text" Group="MacroView DMF Columns" StaticName="mvSubject" ShowInNewForm="FALSE" ShowInDisplayForm="TRUE" ShowInFileDlg="FALSE" ShowInEditForm="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" ReadOnly="TRUE">
+          <Formula>=[Conversation Topic]</Formula>
+        </Field>
+        <Field Name="mvHasAttachments" ID="{8a522278-4487-459c-ae7b-e96f6ee55020}" Type="Calculated" DisplayName="Attachments" Indexed="FALSE" Format="DateOnly" ResultType="Boolean" Group="MacroView DMF Columns" StaticName="mvHasAttachments" Required="FALSE" SourceID="{784d0306-cda8-4df5-8729-f410be8df6ea}" AllowDeletion="TRUE" ReadOnly="TRUE">
+          <Formula>=IFERROR(INT([Attach Count])&gt;0,FALSE)</Formula>
+        </Field>
+        <Field Name="mvAttachmentIcon" ID="{870a5584-7868-4b82-9314-50ee04eb2c5e}" Type="Calculated" DisplayName="📎" Indexed="FALSE" ResultType="Text" LCID="1033" Group="MacroView DMF Columns" StaticName="mvAttachmentIcon" Required="FALSE" SourceID="{7694beb4-4f1b-47f4-9133-845cf2363e6b}" AllowDeletion="TRUE" ReadOnly="TRUE">
+          <Formula>=IF(IFERROR(INT([Attach Count])&gt;0,FALSE),"📎"," ")</Formula>
+        </Field>
+      </pnp:SiteFields>
+
+      <pnp:ContentTypes>
+        <pnp:ContentType 
+            ID="0x0101009D1CB255DA76424F860D91F20E6C411800C57E7DC123744954AACC08D1D5260154" 
+            Name="Aktualität von Inhalten" 
+            Description="Ein neues Dokument erstellen." 
+            Group="_Hidden" 
+            Hidden="true">
+          <pnp:FieldRefs>
+            <pnp:FieldRef ID="8553196d-ec8d-4564-9861-3dbe931050c8" Name="FileLeafRef" Required="true" UpdateChildren="true" />
+            <pnp:FieldRef ID="fa564e0f-0c70-4ab9-b863-0177e6ddd247" Name="Title" UpdateChildren="true" />
+            <pnp:FieldRef ID="28cf69c5-fa48-462a-b5cd-27b6f9d2bd5f" Name="Modified" Hidden="true" UpdateChildren="true" />
+            <pnp:FieldRef ID="8c06beca-0777-48f7-91c7-6da68bc07b69" Name="Created" Hidden="true" UpdateChildren="true" />
+          </pnp:FieldRefs>
+        </pnp:ContentType>
+      </pnp:ContentTypes>
+
+      <pnp:Lists>
+        <pnp:ListInstance Title="Dokumente" Url="Freigegebene Dokumente" TemplateType="101" ContentTypesEnabled="true">
+          <pnp:ContentTypeBindings>
+            <pnp:ContentTypeBinding ContentTypeID="0x010100776D10CC9E0943CEA6FE18350BDDD96D" Default="true" />
+            <pnp:ContentTypeBinding ContentTypeID="0x0120" />
+            <pnp:ContentTypeBinding ContentTypeID="0x010100776D10CC9E0943CEA6FE18350BDDD96C" />
+          </pnp:ContentTypeBindings>
+          <pnp:Views>
+            <View Name="{43948CA7-84D6-498F-BEF3-8E9F971886CA}" DefaultView="TRUE" Type="HTML" DisplayName="All Documents" Url="{site}/Freigegebene Dokumente/Forms/All Documents.aspx" Level="1" BaseViewID="1" ContentTypeID="0x" ImageUrl="/_layouts/15/images/dlicon.png?rev=47">
+              <Query>
+                <OrderBy>
+                  <FieldRef Name="Modified" Ascending="FALSE" />
+                </OrderBy>
+              </Query>
+              <ViewFields>
+                <FieldRef Name="DocIcon" />
+                <FieldRef Name="LinkFilename" />
+                <FieldRef Name="Modified" />
+                <FieldRef Name="Editor" />
+                <FieldRef Name="CheckoutUser" />
+                <FieldRef Name="mvOriginal_x0020_Author" />
+                <FieldRef Name="mvOriginal_x0020_Created" />
+                <FieldRef Name="mvOriginal_x0020_Modified" />
+              </ViewFields>
+              <RowLimit Paged="TRUE">30</RowLimit>
+              <JSLink>clienttemplates.js</JSLink>
+            </View>
+            <View Name="{3DEBB257-0540-4053-95BC-DAEE1993608B}" Type="HTML" DisplayName="Emails" Url="{site}/Freigegebene Dokumente/Forms/Emails.aspx" Level="1" BaseViewID="1" ContentTypeID="0x" ImageUrl="/_layouts/15/images/dlicon.png?rev=47">
+              <Query>
+                <OrderBy>
+                  <FieldRef Name="mvReceivedTime" Ascending="FALSE" />
+                </OrderBy>
+                <Where>
+                  <Or>
+                    <Contains>
+                      <FieldRef Name="FileLeafRef" />
+                      <Value Type="File">.MSG</Value>
+                    </Contains>
+                    <Contains>
+                      <FieldRef Name="FileLeafRef" />
+                      <Value Type="File">.EML</Value>
+                    </Contains>
+                  </Or>
+                </Where>
+              </Query>
+              <ViewFields>
+                <FieldRef Name="DocIcon" />
+                <FieldRef Name="mvAttachmentIcon" />
+                <FieldRef Name="mvSubject" />
+                <FieldRef Name="mvTo" />
+                <FieldRef Name="mvFrom" />
+                <FieldRef Name="mvReceivedTime" />
+                <FieldRef Name="LinkFilename" />
+                <FieldRef Name="mvAttach_x0020_Count" />
+                <FieldRef Name="mvTrackingTag" />
+              </ViewFields>
+              <RowLimit Paged="TRUE">30</RowLimit>
+              <JSLink>clienttemplates.js</JSLink>
+            </View>
+            <View Name="{D427C088-F99A-4E24-BE2B-13D42AC0541D}" Type="HTML" DisplayName="Word Documents" Url="{site}/Freigegebene Dokumente/Forms/Word Documents.aspx" Level="1" BaseViewID="1" ContentTypeID="0x" ImageUrl="/_layouts/15/images/dlicon.png?rev=47">
+              <Query>
+                <OrderBy>
+                  <FieldRef Name="FileLeafRef" />
+                </OrderBy>
+                <Where>
+                  <Or>
+                    <Contains>
+                      <FieldRef Name="FileLeafRef" />
+                      <Value Type="File">.doc</Value>
+                    </Contains>
+                    <Contains>
+                      <FieldRef Name="FileLeafRef" />
+                      <Value Type="File">.dot</Value>
+                    </Contains>
+                  </Or>
+                </Where>
+              </Query>
+              <ViewFields>
+                <FieldRef Name="DocIcon" />
+                <FieldRef Name="LinkFilename" />
+                <FieldRef Name="Modified" />
+                <FieldRef Name="Editor" />
+                <FieldRef Name="CheckoutUser" />
+                <FieldRef Name="mvOriginal_x0020_Author" />
+                <FieldRef Name="mvOriginal_x0020_Created" />
+                <FieldRef Name="mvOriginal_x0020_Modified" />
+              </ViewFields>
+              <RowLimit Paged="TRUE">30</RowLimit>
+              <JSLink>clienttemplates.js</JSLink>
+            </View>
+            <View Name="{D0F57655-5639-40E4-B623-2F5CB006D6C0}" Type="HTML" DisplayName="Excel Documents" Url="{site}/Freigegebene Dokumente/Forms/Excel Documents.aspx" Level="1" BaseViewID="1" ContentTypeID="0x" ImageUrl="/_layouts/15/images/dlicon.png?rev=47">
+              <Query>
+                <OrderBy>
+                  <FieldRef Name="FileLeafRef" />
+                </OrderBy>
+                <Where>
+                  <Or>
+                    <Contains>
+                      <FieldRef Name="FileLeafRef" />
+                      <Value Type="File">.xls</Value>
+                    </Contains>
+                    <Contains>
+                      <FieldRef Name="FileLeafRef" />
+                      <Value Type="File">.xlt</Value>
+                    </Contains>
+                  </Or>
+                </Where>
+              </Query>
+              <ViewFields>
+                <FieldRef Name="DocIcon" />
+                <FieldRef Name="LinkFilename" />
+                <FieldRef Name="Modified" />
+                <FieldRef Name="Editor" />
+                <FieldRef Name="CheckoutUser" />
+                <FieldRef Name="mvOriginal_x0020_Author" />
+                <FieldRef Name="mvOriginal_x0020_Created" />
+                <FieldRef Name="mvOriginal_x0020_Modified" />
+              </ViewFields>
+              <RowLimit Paged="TRUE">30</RowLimit>
+              <JSLink>clienttemplates.js</JSLink>
+            </View>
+            <View Name="{9382E8FC-391F-42E4-9963-D0022A672508}" Type="HTML" DisplayName="PowerPoint Documents" Url="{site}/Freigegebene Dokumente/Forms/PowerPoint Documents.aspx" Level="1" BaseViewID="1" ContentTypeID="0x" ImageUrl="/_layouts/15/images/dlicon.png?rev=47">
+              <Query>
+                <OrderBy>
+                  <FieldRef Name="FileLeafRef" />
+                </OrderBy>
+                <Where>
+                  <Or>
+                    <Contains>
+                      <FieldRef Name="FileLeafRef" />
+                      <Value Type="File">.ppt</Value>
+                    </Contains>
+                    <Contains>
+                      <FieldRef Name="FileLeafRef" />
+                      <Value Type="File">.pot</Value>
+                    </Contains>
+                  </Or>
+                </Where>
+              </Query>
+              <ViewFields>
+                <FieldRef Name="DocIcon" />
+                <FieldRef Name="LinkFilename" />
+                <FieldRef Name="Modified" />
+                <FieldRef Name="Editor" />
+                <FieldRef Name="CheckoutUser" />
+                <FieldRef Name="mvOriginal_x0020_Author" />
+                <FieldRef Name="mvOriginal_x0020_Created" />
+                <FieldRef Name="mvOriginal_x0020_Modified" />
+              </ViewFields>
+              <RowLimit Paged="TRUE">30</RowLimit>
+              <JSLink>clienttemplates.js</JSLink>
+            </View>
+            <View Name="{A927F428-0619-44A1-843A-0B6F06559A3A}" Type="HTML" DisplayName="PDF Documents" Url="{site}/Freigegebene Dokumente/Forms/PDF Documents.aspx" Level="1" BaseViewID="1" ContentTypeID="0x" ImageUrl="/_layouts/15/images/dlicon.png?rev=47">
+              <Query>
+                <OrderBy>
+                  <FieldRef Name="FileLeafRef" />
+                </OrderBy>
+                <Where>
+                  <Contains>
+                    <FieldRef Name="FileLeafRef" />
+                    <Value Type="File">.pdf</Value>
+                  </Contains>
+                </Where>
+              </Query>
+              <ViewFields>
+                <FieldRef Name="DocIcon" />
+                <FieldRef Name="LinkFilename" />
+                <FieldRef Name="Modified" />
+                <FieldRef Name="Editor" />
+                <FieldRef Name="CheckoutUser" />
+                <FieldRef Name="mvOriginal_x0020_Author" />
+                <FieldRef Name="mvOriginal_x0020_Created" />
+                <FieldRef Name="mvOriginal_x0020_Modified" />
+                <FieldRef Name="mvOriginal_x0020_Producer" />
+              </ViewFields>
+              <RowLimit Paged="TRUE">30</RowLimit>
+              <JSLink>clienttemplates.js</JSLink>
+            </View>
+          </pnp:Views>
+          <pnp:FieldRefs>
+            <pnp:FieldRef ID="fa564e0f-0c70-4ab9-b863-0177e6ddd247" Name="Title" DisplayName="Titel" />
+            <pnp:FieldRef ID="e25e461e-afed-4984-9834-153b65f8055f" Name="mvOriginal_x0020_Author" DisplayName="Original Author" />
+            <pnp:FieldRef ID="5a71bcfa-ccd5-4f24-af52-8ed5df336668" Name="mvOriginal_x0020_Created" DisplayName="Original Created" />
+            <pnp:FieldRef ID="d9f27c42-fe75-4d0f-881b-e353638a13e4" Name="mvOriginal_x0020_Modified" DisplayName="Original Modified" />
+            <pnp:FieldRef ID="4af91665-7ec3-4ba3-a262-54652bd8b473" Name="mvOriginal_x0020_Producer" DisplayName="Original Producer" />
+            <pnp:FieldRef ID="abe3cc77-e806-4297-8739-c435a27998a3" Name="mvOriginal_x0020_FileName" DisplayName="Original FileName" />
+            <pnp:FieldRef ID="ca6d4bf6-f9fe-46c4-ae52-45f4b5d9dc7a" Name="mvTo" DisplayName="To" />
+            <pnp:FieldRef ID="c218c8ad-942f-45d0-9735-6e30d11fac2a" Name="mvFrom" DisplayName="From" />
+            <pnp:FieldRef ID="f8706816-413b-4e25-8972-b69ed7ee0487" Name="mvCC" DisplayName="CC" />
+            <pnp:FieldRef ID="38d73b32-349d-4695-914a-72aaaf1839cd" Name="mvBCC" DisplayName="BCC" />
+            <pnp:FieldRef ID="6775ca14-9bcd-4568-a8cb-6a6e7d2bd402" Name="mvAttach_x0020_Count" DisplayName="Attach Count" />
+            <pnp:FieldRef ID="8918ff3f-2d47-479f-afbc-ed71571e8ae2" Name="mvConversationTopic" DisplayName="Conversation Topic" />
+            <pnp:FieldRef ID="e160c0b3-fe16-4132-84dc-bf82837c6cc8" Name="mvMessageID" DisplayName="Message ID" />
+            <pnp:FieldRef ID="05619d50-29e0-4e67-8563-4d1b69fb9cb2" Name="mvImportance" DisplayName="Importance" />
+            <pnp:FieldRef ID="83599b91-819f-4974-a9e0-31bb64570a5a" Name="mvReceivedTime" DisplayName="Received Time" />
+            <pnp:FieldRef ID="2b419db5-4e99-4da1-8ac2-327409ba562d" Name="mvSensitivity" DisplayName="Sensitivity" />
+            <pnp:FieldRef ID="11196889-ccb9-43f6-a378-7a1d2ae1ae92" Name="mvSentOn" DisplayName="Sent On" />
+            <pnp:FieldRef ID="00e8ec3b-060c-4532-85c7-475f46169d42" Name="mvTrackingTag" DisplayName="Tracking Tag" />
+            <pnp:FieldRef ID="8a522278-4487-459c-ae7b-e96f6ee55020" Name="mvHasAttachments" DisplayName="Attachments" />
+            <pnp:FieldRef ID="870a5584-7868-4b82-9314-50ee04eb2c5e" Name="mvAttachmentIcon" DisplayName="📎" />
+            <pnp:FieldRef ID="ca0f980f-8f12-4c3c-9054-cfb9cb8e0d54" Name="mvSubject" DisplayName="Subject" />
+          </pnp:FieldRefs>
+        </pnp:ListInstance>
+      </pnp:Lists>
+
+      <pnp:Features>
+        <pnp:WebFeatures>
+          <pnp:Feature ID="f151bb39-7c3b-414f-bb36-6bf18872052f" />
+        </pnp:WebFeatures>
+      </pnp:Features>
+
+      <pnp:Navigation>
+        <pnp:CurrentNavigation NavigationType="StructuralLocal">
+          <pnp:StructuralNavigation RemoveExistingNodes="false">
+            <pnp:NavigationNode Title="Documents" Url="{site}/Freigegebene Dokumente/Forms/All Documents.aspx" />
+          </pnp:StructuralNavigation>
+        </pnp:CurrentNavigation>
+      </pnp:Navigation>
+
+    </pnp:ProvisioningTemplate>
+  </pnp:Templates>
+</pnp:Provisioning>

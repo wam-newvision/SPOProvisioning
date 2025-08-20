@@ -9,6 +9,6 @@
 	],
 	"settings": {
 		"debug.internalConsoleOptions": "neverOpen",
-		"powershell.cwd": "dms-provisioning"
+		"powershell.cwd": "SPOProvisioning"
 	}
 }

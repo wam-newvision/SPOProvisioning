@@ -4,16 +4,16 @@ param($Request, $TriggerMetadata)
 $functionRoot = Split-Path -Parent $PSScriptRoot       # …\wwwroot
 $helpersDir   = Join-Path $functionRoot 'Helpers'
 
-. (Join-Path $helpersDir 'AdminFunctions.ps1')
 . (Join-Path $helpersDir 'LoggingFunctions.ps1')
+. (Join-Path $helpersDir 'AdminFunctions.ps1')
+. (Join-Path $helpersDir 'SPOLibraryFunctions.ps1')
 . (Join-Path $helpersDir 'ProvisionPnP.ps1')
 . (Join-Path $helpersDir 'PSHelpers.ps1')
-. (Join-Path $helpersDir 'SPOLibraryFunctions.ps1')
 
 # ------------- Framework-Helpers ----------------------------
 $InformationPreference = 'Continue'
 $CurDir                = Get-Location
-$certsDir              = Join-Path $functionRoot 'certs'
+$certsDir              = Join-Path $functionRoot 'Certs'
 Get-ChildItem -Path $certsDir
 $modulesDir            = Join-Path $functionRoot 'Modules'
 Log "---------------------- Start Logging ---------------------"
