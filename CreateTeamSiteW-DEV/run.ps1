@@ -17,9 +17,9 @@ $TEAMS_TAB_FUNC_KEY       = $env:TEAMS_TAB_FUNC_KEY
 # ------------- Framework-Helpers ----------------------------
 $InformationPreference = 'Continue'
 $CurDir                = Get-Location
-$certsDir              = Join-Path $functionRoot 'Certs'
-Get-ChildItem -Path $certsDir
 $modulesDir            = Join-Path $functionRoot 'Modules'
+$certsDir              = Join-Path $functionRoot 'certs'
+Get-ChildItem -Path $certsDir
 Log "---------------------- Start Logging ---------------------"
 Log "PowerShell Version: $($PSVersionTable.PSVersion)"
 Log "Current Directory : $CurDir"
@@ -80,7 +80,16 @@ Log "Eingaben prüfen und Variablen initialisieren..."
     # Setze alle Variablen für die optionalen Parameter
     foreach ($param in $optionalParams) {
         $paramName = $param.Name
-        Set-Variable -Name $paramName -Value $params[$paramName]
+        $value     = $params[$paramName]
+
+        if ($value -is [array]) {
+            Log "optional Parameter : $paramName (Array) = $($value -join ', ')"
+        }
+        else {
+            Log "optional Parameter : $paramName = $value"
+        }
+
+        Set-Variable -Name $paramName -Value $value
     }
 
     # --------------------------------------------------------------------
